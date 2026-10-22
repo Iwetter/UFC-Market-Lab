@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "production_enabled": false,
+  "max_order_contracts": "2",
+  "max_session_notional": "10.00",
+  "allowed_series": ["KXUFCFIGHT"],
+  "database": "data/live-audit.sqlite3"
+}

@@ -1,0 +1,10 @@
+[project]
+name = "ufc-market-lab"
+version = "0.1.0"
+description = "Event-sourced UFC prediction market research and paper execution"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]

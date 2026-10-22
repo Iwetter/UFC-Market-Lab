@@ -1,0 +1,21 @@
+{
+  "mode": "paper",
+  "source": "mock",
+  "live_enabled": false,
+  "initial_cash": "1000.00",
+  "max_order_contracts": "10.00",
+  "max_bout_loss": "25.00",
+  "max_event_loss": "50.00",
+  "max_total_loss": "100.00",
+  "max_daily_loss": "25.00",
+  "daily_drawdown": "20.00",
+  "max_spread": "0.10",
+  "slippage": "0.01",
+  "max_participation": "0.25",
+  "order_latency_ms": 250,
+  "max_book_age_ms": 5000,
+  "max_fight_age_ms": 15000,
+  "blackout_seconds": 10,
+  "kalshi_poll_seconds": 3,
+  "database": "data/paper.sqlite3"
+}

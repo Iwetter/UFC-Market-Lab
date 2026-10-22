@@ -1,0 +1,29 @@
+{
+  "verified_utc": "2026-10-21T23:38:42.789139+00:00",
+  "sources": {
+    "https://docs.kalshi.com/openapi.yaml": {
+      "sha256": "f060c10fe3ab530b8d6564c192e0837bcfd3fd0927b9ac7a0e79c70a8cfa52d8",
+      "bytes": 410482
+    },
+    "https://docs.kalshi.com/asyncapi.yaml": {
+      "sha256": "6b27304fe63969da55b326864d82bb0ea13ac53235f324c24d2dec4a544d7021",
+      "bytes": 217926
+    }
+  },
+  "checks": {
+    "v2_required_fields": [
+      "count",
+      "price",
+      "self_trade_prevention_type",
+      "side",
+      "ticker",
+      "time_in_force"
+    ],
+    "side_enum": [
+      "bid",
+      "ask"
+    ],
+    "order_path": "/portfolio/events/orders",
+    "passed": true
+  }
+}
