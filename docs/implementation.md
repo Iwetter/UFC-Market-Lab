@@ -1,3 +1,5 @@
+> **Update October 29, 2026:** This initial architecture mapping is retained for context. Subsequent work adds pinned historical acquisition, fitted research baselines, judging samples, interval-censored physical/broadcast timing studies, licensed DDE raw/TIP capture, independent-bout position evidence, a Research dashboard tab, and a single-writer always-on deployment. Current scope and actual results are documented in the new linked research/deployment documents and `data-training-report.json`. No card-level empirical trading/latency gate is implied by the software extension.
+
 # Implementation decisions and architecture mapping
 
 Prepared October 21, 2026. Original materials are retained unmodified as design references. No numerical result from an attached reference-repository review is asserted as a result of this platform.

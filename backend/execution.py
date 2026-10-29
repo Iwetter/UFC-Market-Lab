@@ -17,7 +17,7 @@ def date_utc(ts):
 
 def risk_reasons(intent, market, book, mapping, fight, cfg, ts, *, killed=False,
                  exchange_active=True, clock_offset_ms=None, model_ready=False,
-                 fees=None):
+                 fees=None, prefight_cutoff_ms=None):
     reasons = []
     if killed: reasons.append("kill_switch")
     if not exchange_active: reasons.append("exchange_halted")
@@ -28,7 +28,10 @@ def risk_reasons(intent, market, book, mapping, fight, cfg, ts, *, killed=False,
         reasons.append("market_closed_by_clock")
     if book.stale or not 0 <= ts-book.updated_ms <= cfg.max_book_age_ms:
         reasons.append("book_stale")
-    if not fight or fight.stale or not 0 <= ts-fight.received_ms <= cfg.max_fight_age_ms:
+    if prefight_cutoff_ms is not None:
+        if not fight or fight.status!='scheduled' or ts>=prefight_cutoff_ms:
+            reasons.append('prefight_window_closed')
+    elif not fight or fight.stale or not 0 <= ts-fight.received_ms <= cfg.max_fight_age_ms:
         reasons.append("fight_feed_stale")
     if fight and fight.status in {"paused","finished"}: reasons.append("fight_paused_or_finished")
     if fight and fight.status == "live" and fight.clock_remaining <= cfg.blackout_seconds:

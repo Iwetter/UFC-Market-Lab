@@ -1,0 +1,28 @@
+services:
+  recorder:
+    build: .
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      UFC_SOURCE: kalshi
+      UFC_DATABASE: /app/data/kalshi.sqlite3
+    volumes:
+      - recorder-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  recorder-data:

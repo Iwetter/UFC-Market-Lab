@@ -1,0 +1,13 @@
+# Copy locally and set KALSHI_READ_KEY_FILE in your private .env.
+# This overlay deliberately has no order-key environment or live gateway.
+services:
+  recorder:
+    environment:
+      KALSHI_READ_KEY_ID: ${KALSHI_READ_KEY_ID:?Set a read-only key ID}
+      KALSHI_READ_KEY_PATH: /run/secrets/kalshi_read_key
+    secrets:
+      - kalshi_read_key
+
+secrets:
+  kalshi_read_key:
+    file: ${KALSHI_READ_KEY_FILE:?Set private key path outside the repository}

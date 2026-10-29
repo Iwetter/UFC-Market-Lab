@@ -1,0 +1,92 @@
+{
+  "kind": "historical_research_baseline",
+  "target": "majority_judge_round_winner",
+  "features": [
+    "diff_kd",
+    "diff_sig_str_landed",
+    "diff_td_landed",
+    "diff_sub_att",
+    "diff_ctrl_sec",
+    "diff_distance_landed",
+    "diff_clinch_landed",
+    "diff_ground_landed"
+  ],
+  "coef": [
+    0.42555587589649424,
+    0.8528404880177178,
+    0.39011132956358346,
+    0.3284290061973492,
+    0.779865194752572,
+    0.6181712170760824,
+    0.31532345240113857,
+    0.6828576010650307
+  ],
+  "scale": [
+    0.297729857163516,
+    12.657713028625837,
+    1.2218511996075057,
+    0.5080473347979302,
+    117.27007630448689,
+    9.464317399306104,
+    3.845331997512236,
+    5.465148360993471
+  ],
+  "temperature": 0.8298222106530349,
+  "research_only": true,
+  "approved_for_trading": false,
+  "market_probability_input": false,
+  "train_end": "2022-12-31",
+  "calibration_end": "2023-12-31",
+  "assumed_publication_embargo_days": 7,
+  "observed_availability_timestamps": false,
+  "source_manifest": {
+    "repository": "nlbair/ufc-data",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Noah Bair, UFC Data: scorecards, round statistics, and betting odds, 2013 to 2026, version 0.1.1. Sources: UFCStats, MMA Decisions, BestFightOdds, historical UFC rankings archive, UFCalendar rankings API.",
+    "files": [
+      {
+        "path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663
+      },
+      {
+        "path": "SOURCES.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805
+      },
+      {
+        "path": "METHODS.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/METHODS.md",
+        "sha256": "193493dea65dcadba40d8cde3bbd2985fb7cc42596d2c0ced3c754560ca878fd",
+        "bytes": 3461
+      },
+      {
+        "path": "CITATION.cff",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708
+      },
+      {
+        "path": "data/ufc_all_fights_wide.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448
+      },
+      {
+        "path": "data/ufc_judge_rounds.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_judge_rounds.csv",
+        "sha256": "08a8c0162f201b538d5bd3177b3af11794f4d9730acdb0a775691510f0a0ba3b",
+        "bytes": 10691239
+      }
+    ],
+    "purpose": "retrospective research; no automatic trading approval"
+  },
+  "input_sha256": "1d37bb2192152d10f3844f937a1430a1243b142813e6cbf27f9737e8ea48acbb",
+  "fitted_input_hash_scope": "training_and_calibration_rows_only",
+  "warning": "Current-snapshot retrospective reconstruction. Calibration-set fitting and test metrics are not a market-edge result or live-trading authorization.",
+  "spec_sha256": "62e1e3157ab71385d7976b02b399925059d2afc9537f6e852595ef68ae478f35"
+}

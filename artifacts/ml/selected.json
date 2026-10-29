@@ -1,0 +1,126 @@
+{
+  "kind": "logistic",
+  "temperature": 0.9793790214992374,
+  "features": [
+    "elo_diff",
+    "observed_win_rate_diff",
+    "experience_diff",
+    "layoff_years_diff",
+    "sig_landed_rate_diff",
+    "sig_absorbed_rate_diff",
+    "takedown_rate_diff",
+    "submission_attempt_rate_diff",
+    "control_share_diff",
+    "knockdown_rate_diff",
+    "distance_strike_rate_diff",
+    "clinch_strike_rate_diff",
+    "ground_strike_rate_diff"
+  ],
+  "research_only": true,
+  "approved_for_trading": false,
+  "eligible_for_live": false,
+  "scale": [
+    28.025361074365346,
+    0.12191699020093624,
+    0.5984943356290667,
+    0.5148548460035857,
+    1.8076435545590184,
+    1.7105723825740955,
+    0.13321585798074176,
+    0.07629243718328473,
+    0.20697113777341064,
+    0.06671241477540835,
+    1.6630473387394846,
+    0.5756989045079026,
+    0.8276496199795371
+  ],
+  "coef": [
+    0.30416643844503277,
+    -0.05530809688401718,
+    -0.04066769638567464,
+    -0.06016716501730172,
+    0.14981786657939675,
+    -0.25975268516456024,
+    0.11030616322539362,
+    0.015223824709770262,
+    0.024030165407744733,
+    -0.06648457500756877,
+    0.15608763552954272,
+    -0.04339421917137594,
+    0.043760279189540535
+  ],
+  "candidate": "logistic_c0.1",
+  "training_rows_sha256": "1fe2d5564c2aa4b5549a3920fed9e04bd307bb90bb2c2290da31b7d0f0c96090",
+  "train_last_date": "2022-12-17",
+  "trained_through": "2023-12-31",
+  "calibration_rows_sha256": "d4a14387d92332614aa17d6d31f41976c3ea59910260d4a7c9cb7ecac4d07fdb",
+  "source_manifest": {
+    "repository": "nlbair/ufc-data",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Noah Bair, UFC Data: scorecards, round statistics, and betting odds, 2013 to 2026, version 0.1.1. Sources: UFCStats, MMA Decisions, BestFightOdds, historical UFC rankings archive, UFCalendar rankings API.",
+    "files": [
+      {
+        "path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663
+      },
+      {
+        "path": "SOURCES.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805
+      },
+      {
+        "path": "METHODS.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/METHODS.md",
+        "sha256": "193493dea65dcadba40d8cde3bbd2985fb7cc42596d2c0ced3c754560ca878fd",
+        "bytes": 3461
+      },
+      {
+        "path": "CITATION.cff",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708
+      },
+      {
+        "path": "data/ufc_all_fights_wide.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448
+      },
+      {
+        "path": "data/ufc_judge_rounds.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_judge_rounds.csv",
+        "sha256": "08a8c0162f201b538d5bd3177b3af11794f4d9730acdb0a775691510f0a0ba3b",
+        "bytes": 10691239
+      }
+    ],
+    "purpose": "retrospective research; no automatic trading approval"
+  },
+  "config": {
+    "version": 1,
+    "train_end": "2022-12-31",
+    "validation_end": "2023-06-30",
+    "calibration_end": "2023-12-31",
+    "embargo_days": 7,
+    "seed": 1729,
+    "candidates": [
+      "elo",
+      "logistic_c0.1",
+      "logistic_c1",
+      "gbt_depth1",
+      "gbt_depth2"
+    ]
+  },
+  "limitations": [
+    "Retrospective availability reconstruction from a current historical snapshot; publication times were not observed.",
+    "Seven-day availability embargo is assumed, not measured; later corrections can remain in source history.",
+    "2024\u20132026 aggregate test outcomes were already viewed in prior project research; this is reused holdout, not project-level untouched evidence.",
+    "No timestamped market benchmark, costs, execution or trading edge evaluated. Experimental PAPER only; never live approval."
+  ],
+  "availability_basis": "retrospective_snapshot_inferred_7_day_embargo_not_observed",
+  "spec_sha256": "5cf9684ff89986158cec904acfd86476ce1707e5f6f501bffb48bdf71a89195c"
+}

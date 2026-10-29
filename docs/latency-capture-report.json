@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "config": {
+    "include_mocks": false,
+    "search_before_ms": 15000,
+    "search_after_ms": 30000,
+    "baseline_window_ms": 10000,
+    "threshold_probability": 0.03,
+    "baseline_max_range": 0.03,
+    "min_baseline_quotes": 3,
+    "min_persistence_quotes": 2,
+    "persistence_ms": 500,
+    "max_quote_gap_ms": 4000,
+    "max_spread": "0.15",
+    "min_touch_depth": "1",
+    "exclude_overlaps": true,
+    "min_independent_clusters": 20,
+    "bootstrap_samples": 1000,
+    "bootstrap_seed": 42,
+    "hypothesis_ms": 12000,
+    "hypothesis_tolerance_ms": 2000
+  },
+  "events_supplied": 0,
+  "quotes_supplied": 104,
+  "status_counts": {},
+  "reason_counts": {},
+  "summaries": {
+    "physical_delay_ms": {
+      "n": 0,
+      "independent_clusters": 0,
+      "median_interval_ms": null,
+      "cluster_bootstrap_95pct_interval_ms": null
+    },
+    "available_lead_ms": {
+      "n": 0,
+      "independent_clusters": 0,
+      "median_interval_ms": null,
+      "cluster_bootstrap_95pct_interval_ms": null
+    },
+    "provider_generation_delay_ms": {
+      "n": 0,
+      "independent_clusters": 0,
+      "median_interval_ms": null,
+      "cluster_bootstrap_95pct_interval_ms": null
+    },
+    "broadcast_relative_delay_ms": {
+      "n": 0,
+      "independent_clusters": 0,
+      "median_interval_ms": null,
+      "cluster_bootstrap_95pct_interval_ms": null
+    }
+  },
+  "hypothesis": {
+    "target_ms": 12000,
+    "tolerance_ms": 2000,
+    "status": "insufficient_physical_timing",
+    "required_independent_cards": 20,
+    "observed_independent_cards": 0,
+    "detected_real_episodes": 0,
+    "confidence_interval_ms": null,
+    "meaning": "Physical occurrence to locally observed first sustained price displacement; not proof of a causal reaction or tradable edge."
+  },
+  "broadcast_hypothesis": {
+    "target_ms": 12000,
+    "tolerance_ms": 2000,
+    "status": "insufficient_broadcast_observations",
+    "required_independent_cards": 20,
+    "observed_independent_cards": 0,
+    "detected_real_episodes": 0,
+    "confidence_interval_ms": null,
+    "meaning": "Broadcast-observed event to locally observed first sustained executable-quote displacement. This tests an observation-relative price association, not physical fight-to-market delay or tradable edge."
+  },
+  "observations": [],
+  "warnings": [
+    "A provider packet timestamp is generation time, not physical event time.",
+    "A broadcast-relative delay includes the broadcast path and must not be treated as physical market latency.",
+    "Quote arrival intervals include polling/network uncertainty; source-time diagnostics are separate.",
+    "No price reaction is attributed causally by this detector. Overlapping events and sparse coverage are excluded.",
+    "No displacement in the observed window can mean the market moved before that window; it does not imply delay exceeds the positive search horizon.",
+    "Positive available lead means the observed displacement followed feed availability; negative lead means the market was already moving."
+  ],
+  "latency_stresses": [
+    {
+      "name": "fight-feed-plus-0s",
+      "additional_feed_delay_ms": 0,
+      "measured": false,
+      "purpose": "Sensitivity assumption, not an observed latency"
+    },
+    {
+      "name": "fight-feed-plus-5s",
+      "additional_feed_delay_ms": 5000,
+      "measured": false,
+      "purpose": "Sensitivity assumption, not an observed latency"
+    },
+    {
+      "name": "fight-feed-plus-12s",
+      "additional_feed_delay_ms": 12000,
+      "measured": false,
+      "purpose": "Sensitivity assumption, not an observed latency"
+    },
+    {
+      "name": "fight-feed-plus-20s",
+      "additional_feed_delay_ms": 20000,
+      "measured": false,
+      "purpose": "Sensitivity assumption, not an observed latency"
+    }
+  ],
+  "capture_metadata": {
+    "checked_date": "2026-10-29",
+    "source": "Official Kalshi public REST",
+    "markets": 26,
+    "book_observations": 104,
+    "paired_fight_events": 0,
+    "credentials_used": false,
+    "order_submissions": 0,
+    "duration_seconds": 12
+  }
+}

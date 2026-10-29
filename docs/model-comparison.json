@@ -1,0 +1,2381 @@
+{
+  "cache_key": "37362023dc3733d085f1ed459e7c8f75f0f61152aca6390236544b7bf0d5a6f3",
+  "config": {
+    "version": 1,
+    "train_end": "2022-12-31",
+    "validation_end": "2023-06-30",
+    "calibration_end": "2023-12-31",
+    "embargo_days": 7,
+    "seed": 1729,
+    "candidates": [
+      "elo",
+      "logistic_c0.1",
+      "logistic_c1",
+      "gbt_depth1",
+      "gbt_depth2"
+    ]
+  },
+  "source_manifest": {
+    "repository": "nlbair/ufc-data",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Noah Bair, UFC Data: scorecards, round statistics, and betting odds, 2013 to 2026, version 0.1.1. Sources: UFCStats, MMA Decisions, BestFightOdds, historical UFC rankings archive, UFCalendar rankings API.",
+    "files": [
+      {
+        "path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663
+      },
+      {
+        "path": "SOURCES.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805
+      },
+      {
+        "path": "METHODS.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/METHODS.md",
+        "sha256": "193493dea65dcadba40d8cde3bbd2985fb7cc42596d2c0ced3c754560ca878fd",
+        "bytes": 3461
+      },
+      {
+        "path": "CITATION.cff",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708
+      },
+      {
+        "path": "data/ufc_all_fights_wide.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448
+      },
+      {
+        "path": "data/ufc_judge_rounds.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_judge_rounds.csv",
+        "sha256": "08a8c0162f201b538d5bd3177b3af11794f4d9730acdb0a775691510f0a0ba3b",
+        "bytes": 10691239
+      }
+    ],
+    "purpose": "retrospective research; no automatic trading approval"
+  },
+  "sample_summary": {
+    "source_fights": 6743,
+    "samples": 3828,
+    "exclusions": {
+      "insufficient_lagged_history": 2790,
+      "nonbinary_or_overturned": 125
+    },
+    "embargo_days": 7,
+    "minimum_prior_bouts_per_fighter": 2,
+    "appearance_history_includes_nonbinary_bouts": true,
+    "stats_history_policy": "all source bouts with positive duration and observed statistic values; binary W/L and Elo updates exclude nonbinary outcomes",
+    "observed_publication_timestamps": false,
+    "warning": "Retrospective current-snapshot reconstruction. Not admissible as recorded forward predictions or market-edge evidence."
+  },
+  "features": [
+    "elo_diff",
+    "observed_win_rate_diff",
+    "experience_diff",
+    "layoff_years_diff",
+    "sig_landed_rate_diff",
+    "sig_absorbed_rate_diff",
+    "takedown_rate_diff",
+    "submission_attempt_rate_diff",
+    "control_share_diff",
+    "knockdown_rate_diff",
+    "distance_strike_rate_diff",
+    "clinch_strike_rate_diff",
+    "ground_strike_rate_diff"
+  ],
+  "selected_candidate": "logistic_c0.1",
+  "selection_criterion": "minimum uncalibrated validation log loss only; lexical tie break",
+  "frozen_baseline_selection_exclusion": "Previously fitted research baseline calibrated on all 2023, overlapping validation; benchmark only, never selected.",
+  "partitions": {
+    "train": {
+      "n": 2521,
+      "first": "2013-11-06",
+      "last": "2022-12-17",
+      "sha256": "1fe2d5564c2aa4b5549a3920fed9e04bd307bb90bb2c2290da31b7d0f0c96090",
+      "events": 376
+    },
+    "validation": {
+      "n": 147,
+      "first": "2023-01-14",
+      "last": "2023-06-17",
+      "sha256": "6d8e3e650dd6b8040545d574ba59ebb5d1b5c7d6f3e7ae9458d7a7bd8c696c49",
+      "events": 20
+    },
+    "calibration": {
+      "n": 156,
+      "first": "2023-07-08",
+      "last": "2023-12-16",
+      "sha256": "d4a14387d92332614aa17d6d31f41976c3ea59910260d4a7c9cb7ecac4d07fdb",
+      "events": 21
+    },
+    "reused_holdout": {
+      "n": 992,
+      "first": "2024-01-13",
+      "last": "2026-10-10",
+      "sha256": "b1e341b4f8b05a760fec517ce44680d8d1626ea27baf0fd1253fd4e0d64f19c8",
+      "events": 119
+    }
+  },
+  "excluded_boundary_rows": 12,
+  "validation": {
+    "elo": {
+      "n": 147,
+      "log_loss": 0.6973376489895652,
+      "brier": 0.25211412094140084,
+      "ece": 0.08216013975521338,
+      "accuracy": 0.4557823129251701,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 1,
+          "mean_probability": 0.37077003912332684,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 80,
+          "mean_probability": 0.4683550658287475,
+          "observed_fraction": 0.5625
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 66,
+          "mean_probability": 0.532957208654437,
+          "observed_fraction": 0.4696969696969697
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "logistic_c0.1": {
+      "n": 147,
+      "log_loss": 0.67571711666042,
+      "brier": 0.24225066820167276,
+      "ece": 0.05845294307851941,
+      "accuracy": 0.5510204081632653,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 2,
+          "mean_probability": 0.16707677505667295,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 4,
+          "mean_probability": 0.24604936942377428,
+          "observed_fraction": 0.25
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 30,
+          "mean_probability": 0.36073760624370693,
+          "observed_fraction": 0.4
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 41,
+          "mean_probability": 0.45610317483695845,
+          "observed_fraction": 0.5609756097560976
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 48,
+          "mean_probability": 0.5430066088638492,
+          "observed_fraction": 0.5208333333333334
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 16,
+          "mean_probability": 0.6350020282683686,
+          "observed_fraction": 0.6875
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 5,
+          "mean_probability": 0.7391510682675112,
+          "observed_fraction": 0.6
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 1,
+          "mean_probability": 0.8350551987578116,
+          "observed_fraction": 1.0
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "logistic_c1": {
+      "n": 147,
+      "log_loss": 0.6759066758834135,
+      "brier": 0.24235089343219873,
+      "ece": 0.06655598801896918,
+      "accuracy": 0.5510204081632653,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 2,
+          "mean_probability": 0.16595989944912382,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 6,
+          "mean_probability": 0.26119399852614394,
+          "observed_fraction": 0.16666666666666666
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 28,
+          "mean_probability": 0.36335342065777754,
+          "observed_fraction": 0.42857142857142855
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 41,
+          "mean_probability": 0.4554599705862639,
+          "observed_fraction": 0.5609756097560976
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 48,
+          "mean_probability": 0.5430547799219192,
+          "observed_fraction": 0.5208333333333334
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 16,
+          "mean_probability": 0.6376002871709887,
+          "observed_fraction": 0.6875
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 5,
+          "mean_probability": 0.7405217401757056,
+          "observed_fraction": 0.6
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 1,
+          "mean_probability": 0.8352325212068787,
+          "observed_fraction": 1.0
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "gbt_depth1": {
+      "n": 147,
+      "log_loss": 0.6969480679421488,
+      "brier": 0.2519156849223594,
+      "ece": 0.10719156919855963,
+      "accuracy": 0.48299319727891155,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 7,
+          "mean_probability": 0.39464440036793047,
+          "observed_fraction": 0.14285714285714285
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 70,
+          "mean_probability": 0.45109992589343245,
+          "observed_fraction": 0.5714285714285714
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 67,
+          "mean_probability": 0.543161092675813,
+          "observed_fraction": 0.47761194029850745
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 3,
+          "mean_probability": 0.6067161757088154,
+          "observed_fraction": 1.0
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "gbt_depth2": {
+      "n": 147,
+      "log_loss": 0.6867762638157161,
+      "brier": 0.24701921517984937,
+      "ece": 0.11315505107435984,
+      "accuracy": 0.5034013605442177,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 1,
+          "mean_probability": 0.2942645364086236,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 18,
+          "mean_probability": 0.3775190523090199,
+          "observed_fraction": 0.16666666666666666
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 63,
+          "mean_probability": 0.4563067889654066,
+          "observed_fraction": 0.6190476190476191
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 55,
+          "mean_probability": 0.5464245310304828,
+          "observed_fraction": 0.5272727272727272
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 10,
+          "mean_probability": 0.6238163528103974,
+          "observed_fraction": 0.5
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    }
+  },
+  "selected_calibration": {
+    "n": 156,
+    "log_loss": 0.6663962158870574,
+    "brier": 0.23705781328110076,
+    "ece": 0.09660677106685404,
+    "accuracy": 0.5769230769230769,
+    "calibration_bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "n": 4,
+        "mean_probability": 0.2675450924668696,
+        "observed_fraction": 0.0
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "n": 20,
+        "mean_probability": 0.35527561249804684,
+        "observed_fraction": 0.45
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "n": 43,
+        "mean_probability": 0.4423515459909696,
+        "observed_fraction": 0.4186046511627907
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "n": 54,
+        "mean_probability": 0.550349937954213,
+        "observed_fraction": 0.46296296296296297
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "n": 24,
+        "mean_probability": 0.6281436895474024,
+        "observed_fraction": 0.7916666666666666
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "n": 10,
+        "mean_probability": 0.7276656860990622,
+        "observed_fraction": 0.5
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "n": 1,
+        "mean_probability": 0.8352332724694697,
+        "observed_fraction": 1.0
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      }
+    ]
+  },
+  "holdout": {
+    "elo": {
+      "n": 992,
+      "log_loss": 0.6827735198274034,
+      "brier": 0.24484977238838282,
+      "ece": 0.020704942204152085,
+      "accuracy": 0.5534274193548387,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 12,
+          "mean_probability": 0.38625356615161527,
+          "observed_fraction": 0.3333333333333333
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 505,
+          "mean_probability": 0.4687616783012941,
+          "observed_fraction": 0.44554455445544555
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 466,
+          "mean_probability": 0.5306200401535325,
+          "observed_fraction": 0.5429184549356223
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 9,
+          "mean_probability": 0.6168276619897665,
+          "observed_fraction": 0.8888888888888888
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "logistic_c0.1": {
+      "n": 992,
+      "log_loss": 0.6574756498709451,
+      "brier": 0.23271498919659345,
+      "ece": 0.02716575604071309,
+      "accuracy": 0.6179435483870968,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 1,
+          "mean_probability": 0.1629599965003333,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 33,
+          "mean_probability": 0.26085749579828676,
+          "observed_fraction": 0.18181818181818182
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 176,
+          "mean_probability": 0.3627908365673224,
+          "observed_fraction": 0.3068181818181818
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 283,
+          "mean_probability": 0.45379319534639123,
+          "observed_fraction": 0.4416961130742049
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 304,
+          "mean_probability": 0.5476353841302984,
+          "observed_fraction": 0.5756578947368421
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 164,
+          "mean_probability": 0.6434608989414766,
+          "observed_fraction": 0.6402439024390244
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 26,
+          "mean_probability": 0.7309108945778421,
+          "observed_fraction": 0.7692307692307693
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 5,
+          "mean_probability": 0.8280472552202882,
+          "observed_fraction": 1.0
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "logistic_c1": {
+      "n": 992,
+      "log_loss": 0.6577007696315728,
+      "brier": 0.23283318794455402,
+      "ece": 0.02375345712273614,
+      "accuracy": 0.6149193548387096,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 1,
+          "mean_probability": 0.15719545981049765,
+          "observed_fraction": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 34,
+          "mean_probability": 0.2597341162844403,
+          "observed_fraction": 0.17647058823529413
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 179,
+          "mean_probability": 0.3623465587888138,
+          "observed_fraction": 0.3128491620111732
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 278,
+          "mean_probability": 0.4538754794276429,
+          "observed_fraction": 0.4460431654676259
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 303,
+          "mean_probability": 0.5478184235210626,
+          "observed_fraction": 0.570957095709571
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 163,
+          "mean_probability": 0.6435368529331373,
+          "observed_fraction": 0.6380368098159509
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 28,
+          "mean_probability": 0.7287750179285342,
+          "observed_fraction": 0.7857142857142857
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 6,
+          "mean_probability": 0.8273279085050141,
+          "observed_fraction": 0.8333333333333334
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "gbt_depth1": {
+      "n": 992,
+      "log_loss": 0.6765036212381907,
+      "brier": 0.24174994454186463,
+      "ece": 0.029359911508553407,
+      "accuracy": 0.5786290322580645,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 30,
+          "mean_probability": 0.39502515408919614,
+          "observed_fraction": 0.2
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 486,
+          "mean_probability": 0.4537027906171493,
+          "observed_fraction": 0.43209876543209874
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 452,
+          "mean_probability": 0.5458405481812655,
+          "observed_fraction": 0.5663716814159292
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 24,
+          "mean_probability": 0.6043896195080615,
+          "observed_fraction": 0.75
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    },
+    "gbt_depth2": {
+      "n": 992,
+      "log_loss": 0.670907008105903,
+      "brier": 0.23903210120054721,
+      "ece": 0.027845981326307168,
+      "accuracy": 0.5877016129032258,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "n": 97,
+          "mean_probability": 0.37750647417071254,
+          "observed_fraction": 0.23711340206185566
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "n": 414,
+          "mean_probability": 0.45451263255713736,
+          "observed_fraction": 0.4492753623188406
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "n": 394,
+          "mean_probability": 0.5461772654442149,
+          "observed_fraction": 0.565989847715736
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "n": 87,
+          "mean_probability": 0.6203368024424898,
+          "observed_fraction": 0.6666666666666666
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "n": 0,
+          "mean_probability": null,
+          "observed_fraction": null
+        }
+      ]
+    }
+  },
+  "selected_calibrated_holdout": {
+    "n": 992,
+    "log_loss": 0.6572868060972424,
+    "brier": 0.23263301570224057,
+    "ece": 0.0243014471231003,
+    "accuracy": 0.6179435483870968,
+    "calibration_bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "n": 2,
+        "mean_probability": 0.1779246773884443,
+        "observed_fraction": 0.0
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "n": 33,
+        "mean_probability": 0.2596949678782977,
+        "observed_fraction": 0.18181818181818182
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "n": 181,
+        "mean_probability": 0.3617209802405749,
+        "observed_fraction": 0.30939226519337015
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "n": 277,
+        "mean_probability": 0.45399413727939864,
+        "observed_fraction": 0.44404332129963897
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "n": 298,
+        "mean_probability": 0.5475714380691661,
+        "observed_fraction": 0.5738255033557047
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "n": 165,
+        "mean_probability": 0.6429607376922084,
+        "observed_fraction": 0.6484848484848484
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "n": 30,
+        "mean_probability": 0.7271351859231822,
+        "observed_fraction": 0.7333333333333333
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "n": 6,
+        "mean_probability": 0.8279592261768923,
+        "observed_fraction": 0.8333333333333334
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      }
+    ]
+  },
+  "frozen_research_baseline_holdout": {
+    "n": 992,
+    "log_loss": 0.6559934658553317,
+    "brier": 0.23197749945264345,
+    "ece": 0.031107952830648947,
+    "accuracy": 0.6229838709677419,
+    "calibration_bins": [
+      {
+        "lower": 0.0,
+        "upper": 0.1,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "n": 3,
+        "mean_probability": 0.18741370047750508,
+        "observed_fraction": 0.3333333333333333
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "n": 31,
+        "mean_probability": 0.2612931331464113,
+        "observed_fraction": 0.0967741935483871
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "n": 176,
+        "mean_probability": 0.36123376618066877,
+        "observed_fraction": 0.3068181818181818
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "n": 300,
+        "mean_probability": 0.45513942161000964,
+        "observed_fraction": 0.44333333333333336
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "n": 280,
+        "mean_probability": 0.5494579880373825,
+        "observed_fraction": 0.5857142857142857
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "n": 172,
+        "mean_probability": 0.6434605721376803,
+        "observed_fraction": 0.6511627906976745
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "n": 26,
+        "mean_probability": 0.7318649873350863,
+        "observed_fraction": 0.7307692307692307
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "n": 4,
+        "mean_probability": 0.8256901903668036,
+        "observed_fraction": 1.0
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "n": 0,
+        "mean_probability": null,
+        "observed_fraction": null
+      }
+    ]
+  },
+  "walk_forward": [
+    {
+      "year": 2020,
+      "training_n": 1582,
+      "calibration": "none; fixed hyperparameters",
+      "metrics": {
+        "elo": {
+          "n": 262,
+          "log_loss": 0.6800374410893268,
+          "brier": 0.2434751689366628,
+          "ece": 0.07327138041634912,
+          "accuracy": 0.5954198473282443,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 2,
+              "mean_probability": 0.37435235148073565,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 113,
+              "mean_probability": 0.4699769630564561,
+              "observed_fraction": 0.36283185840707965
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 145,
+              "mean_probability": 0.530329095343135,
+              "observed_fraction": 0.5655172413793104
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 2,
+              "mean_probability": 0.6193594827485163,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c0.1": {
+          "n": 262,
+          "log_loss": 0.6589841665822234,
+          "brier": 0.23314794212310602,
+          "ece": 0.05205374279547458,
+          "accuracy": 0.6183206106870229,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 1,
+              "mean_probability": 0.148284408693093,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 7,
+              "mean_probability": 0.26307393304027565,
+              "observed_fraction": 0.2857142857142857
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 29,
+              "mean_probability": 0.3521498944881195,
+              "observed_fraction": 0.27586206896551724
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 74,
+              "mean_probability": 0.45427227662754166,
+              "observed_fraction": 0.35135135135135137
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 92,
+              "mean_probability": 0.550729708671416,
+              "observed_fraction": 0.5543478260869565
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 52,
+              "mean_probability": 0.6300715903915152,
+              "observed_fraction": 0.5961538461538461
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 6,
+              "mean_probability": 0.7386167248989038,
+              "observed_fraction": 0.8333333333333334
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 1,
+              "mean_probability": 0.837929171214534,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c1": {
+          "n": 262,
+          "log_loss": 0.6586855738844665,
+          "brier": 0.23299595248919402,
+          "ece": 0.04981703184237637,
+          "accuracy": 0.6145038167938931,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 1,
+              "mean_probability": 0.14040962652546077,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 7,
+              "mean_probability": 0.2612959564377083,
+              "observed_fraction": 0.2857142857142857
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 29,
+              "mean_probability": 0.34977657080243946,
+              "observed_fraction": 0.27586206896551724
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 73,
+              "mean_probability": 0.4527981908351783,
+              "observed_fraction": 0.3561643835616438
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 92,
+              "mean_probability": 0.5506754144231809,
+              "observed_fraction": 0.532608695652174
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 53,
+              "mean_probability": 0.6320311594277003,
+              "observed_fraction": 0.6226415094339622
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 6,
+              "mean_probability": 0.7436902106357165,
+              "observed_fraction": 0.8333333333333334
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 1,
+              "mean_probability": 0.8452876142158838,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth1": {
+          "n": 262,
+          "log_loss": 0.6772658541741625,
+          "brier": 0.24210195959093236,
+          "ece": 0.06123960912135012,
+          "accuracy": 0.6030534351145038,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 7,
+              "mean_probability": 0.39651664254652536,
+              "observed_fraction": 0.42857142857142855
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 114,
+              "mean_probability": 0.4605568015480198,
+              "observed_fraction": 0.3508771929824561
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 138,
+              "mean_probability": 0.5425297302534453,
+              "observed_fraction": 0.5652173913043478
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 3,
+              "mean_probability": 0.6046595046264646,
+              "observed_fraction": 0.6666666666666666
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth2": {
+          "n": 262,
+          "log_loss": 0.6704124861378098,
+          "brier": 0.23876427114640283,
+          "ece": 0.05571143994796826,
+          "accuracy": 0.5916030534351145,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 26,
+              "mean_probability": 0.37251347761431997,
+              "observed_fraction": 0.15384615384615385
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 86,
+              "mean_probability": 0.4591500620786721,
+              "observed_fraction": 0.4186046511627907
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 118,
+              "mean_probability": 0.5393826578087401,
+              "observed_fraction": 0.559322033898305
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 32,
+              "mean_probability": 0.6272279728456531,
+              "observed_fraction": 0.53125
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "year": 2021,
+      "training_n": 1844,
+      "calibration": "none; fixed hyperparameters",
+      "metrics": {
+        "elo": {
+          "n": 330,
+          "log_loss": 0.6822781761140867,
+          "brier": 0.24459140547987065,
+          "ece": 0.04696275012528176,
+          "accuracy": 0.5727272727272728,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 4,
+              "mean_probability": 0.37848134944734224,
+              "observed_fraction": 0.5
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 168,
+              "mean_probability": 0.4722229595737309,
+              "observed_fraction": 0.4583333333333333
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 156,
+              "mean_probability": 0.5294979769785814,
+              "observed_fraction": 0.6089743589743589
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 2,
+              "mean_probability": 0.6399300697021293,
+              "observed_fraction": 0.5
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c0.1": {
+          "n": 330,
+          "log_loss": 0.6669092850604674,
+          "brier": 0.23738522706820772,
+          "ece": 0.05185681115336595,
+          "accuracy": 0.5727272727272728,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 9,
+              "mean_probability": 0.25608333550697043,
+              "observed_fraction": 0.2222222222222222
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 42,
+              "mean_probability": 0.36168491006778997,
+              "observed_fraction": 0.30952380952380953
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 97,
+              "mean_probability": 0.4570463381888298,
+              "observed_fraction": 0.5360824742268041
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 122,
+              "mean_probability": 0.5446830433026126,
+              "observed_fraction": 0.5655737704918032
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 46,
+              "mean_probability": 0.645242337035702,
+              "observed_fraction": 0.5869565217391305
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 13,
+              "mean_probability": 0.7248463799557334,
+              "observed_fraction": 0.8461538461538461
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 1,
+              "mean_probability": 0.8560870387816681,
+              "observed_fraction": 1.0
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c1": {
+          "n": 330,
+          "log_loss": 0.6663986400100713,
+          "brier": 0.23714441935478955,
+          "ece": 0.055151893824609506,
+          "accuracy": 0.5757575757575758,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 9,
+              "mean_probability": 0.25162942078994505,
+              "observed_fraction": 0.2222222222222222
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 43,
+              "mean_probability": 0.36063065395450855,
+              "observed_fraction": 0.32558139534883723
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 97,
+              "mean_probability": 0.45759696263684896,
+              "observed_fraction": 0.5257731958762887
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 120,
+              "mean_probability": 0.5453337145291148,
+              "observed_fraction": 0.575
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 45,
+              "mean_probability": 0.6440232213668434,
+              "observed_fraction": 0.5555555555555556
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 15,
+              "mean_probability": 0.7241839936153115,
+              "observed_fraction": 0.8666666666666667
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 1,
+              "mean_probability": 0.862991883042385,
+              "observed_fraction": 1.0
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth1": {
+          "n": 330,
+          "log_loss": 0.6742849370532574,
+          "brier": 0.2406465140756589,
+          "ece": 0.057428030310550035,
+          "accuracy": 0.5969696969696969,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 7,
+              "mean_probability": 0.3952380923954185,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 153,
+              "mean_probability": 0.4578570264476729,
+              "observed_fraction": 0.45098039215686275
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 157,
+              "mean_probability": 0.539733160796667,
+              "observed_fraction": 0.6305732484076433
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 13,
+              "mean_probability": 0.6054280426381812,
+              "observed_fraction": 0.5384615384615384
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth2": {
+          "n": 330,
+          "log_loss": 0.6731815782573695,
+          "brier": 0.24014237430823307,
+          "ece": 0.05627367842372807,
+          "accuracy": 0.5818181818181818,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 25,
+              "mean_probability": 0.37683809346009084,
+              "observed_fraction": 0.24
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 130,
+              "mean_probability": 0.45656074719643863,
+              "observed_fraction": 0.4846153846153846
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 137,
+              "mean_probability": 0.5406972742556976,
+              "observed_fraction": 0.6131386861313869
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 38,
+              "mean_probability": 0.6204680329446205,
+              "observed_fraction": 0.5789473684210527
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "year": 2022,
+      "training_n": 2174,
+      "calibration": "none; fixed hyperparameters",
+      "metrics": {
+        "elo": {
+          "n": 347,
+          "log_loss": 0.6818807711207175,
+          "brier": 0.2443841235524957,
+          "ece": 0.07372123530008046,
+          "accuracy": 0.6051873198847262,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 3,
+              "mean_probability": 0.37422784625338856,
+              "observed_fraction": 0.3333333333333333
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 169,
+              "mean_probability": 0.4716817899247898,
+              "observed_fraction": 0.3905325443786982
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 165,
+              "mean_probability": 0.5298564194933433,
+              "observed_fraction": 0.6
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 10,
+              "mean_probability": 0.6170671829479915,
+              "observed_fraction": 0.6
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c0.1": {
+          "n": 347,
+          "log_loss": 0.6693317064662099,
+          "brier": 0.23826756109336275,
+          "ece": 0.03820872642152862,
+          "accuracy": 0.6051873198847262,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 2,
+              "mean_probability": 0.17129934854373607,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 11,
+              "mean_probability": 0.2712320565137935,
+              "observed_fraction": 0.36363636363636365
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 49,
+              "mean_probability": 0.35998303077866295,
+              "observed_fraction": 0.2653061224489796
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 114,
+              "mean_probability": 0.4554043350804992,
+              "observed_fraction": 0.45614035087719296
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 100,
+              "mean_probability": 0.5488974575102884,
+              "observed_fraction": 0.55
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 53,
+              "mean_probability": 0.6447350377905705,
+              "observed_fraction": 0.7169811320754716
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 18,
+              "mean_probability": 0.7353894687658996,
+              "observed_fraction": 0.5555555555555556
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "logistic_c1": {
+          "n": 347,
+          "log_loss": 0.6702013693442791,
+          "brier": 0.23864908345630667,
+          "ece": 0.040979151494334634,
+          "accuracy": 0.6080691642651297,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 2,
+              "mean_probability": 0.166432229145355,
+              "observed_fraction": 0.0
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 13,
+              "mean_probability": 0.2724664547728092,
+              "observed_fraction": 0.38461538461538464
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 49,
+              "mean_probability": 0.3614937016870683,
+              "observed_fraction": 0.2857142857142857
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 113,
+              "mean_probability": 0.4559032293304426,
+              "observed_fraction": 0.4424778761061947
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 97,
+              "mean_probability": 0.5491301398965598,
+              "observed_fraction": 0.5567010309278351
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 51,
+              "mean_probability": 0.6411942888549732,
+              "observed_fraction": 0.7058823529411765
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 22,
+              "mean_probability": 0.7347836830387954,
+              "observed_fraction": 0.5909090909090909
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth1": {
+          "n": 347,
+          "log_loss": 0.6779210514165922,
+          "brier": 0.242436861902834,
+          "ece": 0.034854279746415494,
+          "accuracy": 0.5763688760806917,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 10,
+              "mean_probability": 0.3918506280445112,
+              "observed_fraction": 0.5
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 152,
+              "mean_probability": 0.45462848605765344,
+              "observed_fraction": 0.40789473684210525
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 168,
+              "mean_probability": 0.5402749564914818,
+              "observed_fraction": 0.5535714285714286
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 17,
+              "mean_probability": 0.6073174022201819,
+              "observed_fraction": 0.7058823529411765
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        },
+        "gbt_depth2": {
+          "n": 347,
+          "log_loss": 0.67662449345722,
+          "brier": 0.24178997558754134,
+          "ece": 0.03168080779119938,
+          "accuracy": 0.5821325648414986,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "upper": 0.1,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "n": 29,
+              "mean_probability": 0.3718609094914156,
+              "observed_fraction": 0.3448275862068966
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "n": 137,
+              "mean_probability": 0.4549700689217658,
+              "observed_fraction": 0.4233576642335766
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "n": 146,
+              "mean_probability": 0.5449453158206696,
+              "observed_fraction": 0.5342465753424658
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "n": 35,
+              "mean_probability": 0.619532617822987,
+              "observed_fraction": 0.7428571428571429
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1.0,
+              "n": 0,
+              "mean_probability": null,
+              "observed_fraction": null
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Retrospective availability reconstruction from a current historical snapshot; publication times were not observed.",
+    "Seven-day availability embargo is assumed, not measured; later corrections can remain in source history.",
+    "2024\u20132026 aggregate test outcomes were already viewed in prior project research; this is reused holdout, not project-level untouched evidence.",
+    "No timestamped market benchmark, costs, execution or trading edge evaluated. Experimental PAPER only; never live approval."
+  ],
+  "research_only": true,
+  "eligible_for_live": false,
+  "model_sha256": "5cf9684ff89986158cec904acfd86476ce1707e5f6f501bffb48bdf71a89195c",
+  "versions": {
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1"
+  },
+  "reproduce": "python scripts/train_models.py",
+  "market_benchmark": null
+}

@@ -20,6 +20,34 @@ The first browser test exposed a missing WebSocket serialization import. It was 
 
 The test suite may emit a Starlette warning that its httpx test client integration is deprecated in favor of httpx2. Runtime HTTP/WS behavior and test assertions pass; this is a dependency migration notice, not a suppressed failure.
 
-Not verified with real credentials/data: authenticated Kalshi WS, Sportradar or other vendor-specific integration, demo/prod order submission, measured real feed latency, sustained uptime, trained UFC calibration or profitable edge. Live-gateway tests use an in-memory HTTP transport pointed at the official demo URL contract, with no network dispatch.
+At the October 21 baseline, not verified with real credentials/data: authenticated Kalshi WS, Sportradar or other vendor-specific integration, demo/prod order submission, measured real feed latency, sustained uptime, trained UFC calibration or profitable edge. The October 29 extension below adds explicitly limited historical model evaluation. Live-gateway tests use an in-memory HTTP transport pointed at the official demo URL contract, with no network dispatch.
 
-The GitHub Actions workflow is provided but has not run remotely; Linux/Python 3.12 compatibility is configured in CI, not claimed from local Windows testing. No external GitHub repository was modified.
+At the October 21 baseline, the GitHub Actions workflow had not run remotely; Linux/Python 3.12 compatibility was configured in CI, not claimed from local Windows testing. That baseline was delivered as a local export. Check the pull request for current remote CI results.
+
+
+## October 29 extension
+
+- Acquired and trained on the real pinned CC BY 4.0 dataset; exact corrected counts, embargo, train/cal/test partitions, fitted model hashes and actual holdout metrics are in `data-training-report.json`. No unchanged model was retrained for subsequent validation passes.
+- Final local integration: **110 Python tests**, **2 frontend tests**, TypeScript/Vite production build and source secret scan passed. Added coverage includes source integrity, nonbinary history, deduplication, test-label perturbation/frozen artifacts, lifecycle/timing/window/session guards, backups, single-writer launcher leases, licensed adapter fault handling, development-run leases, and no promotion from historical inference to execution.
+- Bounded headless real REST capture: 26 markets, 104 book observations across four polls, 12 seconds, healthy collector, no event feed and no orders. `latency-capture-report.json` reports insufficient physical and broadcast timing evidence, not a measured 12-second delay.
+- Browser verified the Research tab's actual historical scores, zero real physical timing/position samples, and mock-tag exclusion.
+- Docker/Compose YAML is prepared and parsed; Docker binary, cloud access, Kalshi read key and licensed vendor entitlement were unavailable. Container execution, authenticated live feeds and deployment are not claimed.
+- One daily 05:15 America/New_York continuation heartbeat is active on this chat. Native schedule ID is recorded in PROGRESS; its target is the existing conversation. The host must remain on with the app running for local file access. No credits, reset credits, subscriptions or hosting were purchased/activated.
+
+## October 29 priority upgrade
+
+- Full final integration: **176 Python tests and 2 frontend tests passed**, with production TypeScript/Vite build and source private-key scan. Model artifact/sklearn parity, lagged identities, timestamp bounds, replay, YES/NO reduce-only automatic exits, atomic saves, throttle handling and SNTP validation are covered. Source scan checks private-key files/PEM blocks, not every possible secret format.
+- Actual bounded public Polymarket US recorder: 2 books, 6 events, verified hash chain, International disabled. Integrated browser showed real Kalshi and US quotes, actual model scores and parent-event identity candidates. Sustained public US requests encountered 429; quotes were explicitly stale. Pacing/Retry-After/backoff was added and fault-tested; sustained post-fix recovery is not claimed.
+- Public SNTP did return a measured host offset of about -0.72 seconds with low sample delay. The offset-plus-uncertainty execution gate blocked correctly; no system time was modified and no zero offset fabricated.
+- Frozen/reused holdout metrics and split limitations are documented in model-comparison.json and ml-pipeline.md. No genuine-market strategy fill, return, authenticated stream, International network integration, credentialed live-feed packet, Docker/cloud execution or in-fight predictive calibration is claimed.
+- Existing remote PR CI passed on 6a90613; check current PR for latest commit's CI. Existing daily 05:15 continuation is unchanged.
+
+Clean-runner CI on a6a5813 exposed one test relying on the unversioned local data cache (175 passed, one failed). The test now creates a labeled synthetic CSV/manifest/artifact fixture and verifies hashes, inference provenance and missing-source failure without network access. It no longer assumes developer-machine data. No runtime validation or source pins were weakened.
+
+## Historical Practice user-flow milestone
+
+The previous UI did not provide the user's requested old-fight automatic practice flow; passing engineering tests did not prove that user goal. docs/PRODUCT_ISSUES.md records the observed failures and corrections. Practice is now the home screen, with searchable historical bouts, Start/Pause/Resume/Step/speed, fixed trained predictions, automatic order activity, a separate account and result reveal.
+
+Full local integration passed 197 Python and 4 frontend tests plus production build. After final search/isolated-worker/error-display changes, 22 targeted practice/API tests and the production build passed. Tests are fully offline with labeled source/model fixtures and validate source hashes, future-result exclusion, model input cutoffs, winner-independent synthetic quotes, YES/NO reduce-only exits, virtual arrival/depth/cost accounting, pause/step, deterministic repeat, archive/close, risk caps, authenticated controls and main-account isolation.
+
+Browser verification on cached real source completed Gerald Meerschaert vs Julius Walker (2026-10-10). The trained pre-fight probability stayed fixed; automatic NO buys and reduce-only sales visibly executed under the synthetic book. Pause worked. Only completed-round statistics appeared, and the recorded result was revealed at the 515-second active-time finish. No synthetic P&L is presented as historical exchange returns or profitable edge. The flow requires no live credentials or real-clock bypass. No fight video or trained in-fight prediction is supplied.

@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--infight-model",help="Separate calibrated checkpoint JSON artifact")
     parser.add_argument("--no-browser",action="store_true")
     parser.add_argument("--no-install",action="store_true",help="Use current Python and existing frontend build")
+    parser.add_argument("--prepare-data",action="store_true",help="Acquire/verify pinned historical data for experimental predictions; no model retraining")
     parser.add_argument("--prepared",action="store_true",help=argparse.SUPPRESS)
     args=parser.parse_args()
     os.chdir(ROOT)
@@ -55,16 +56,23 @@ def main():
         run([python,ROOT/"start.py",*sys.argv[1:],"--prepared"])
         return
     from backend.app import create_app
+    if args.prepare_data:
+        from backend.historical import acquire_source
+        acquire_source(ROOT/'data/research/nlbair')
     from backend.domain import Settings
+    from backend.operations import writer_lease
     import uvicorn
     cfg=Settings.model_validate_json((ROOT/"config/default.json").read_text())
     cfg=cfg.model_copy(update={"source":args.source,"database":args.database or f"data/{args.source}.sqlite3"})
-    app=create_app(cfg,model_path=args.model,infight_model_path=args.infight_model)
-    url=f"http://127.0.0.1:{args.port}"
-    print(f"\nOctagon / UFC Market Lab\n{url}\nSource: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
-    if not args.no_browser:
-        threading.Timer(1.5,lambda:webbrowser.open(url)).start()
-    uvicorn.run(app,host="127.0.0.1",port=args.port,access_log=False)
+    # Acquire before create_app constructs/writes Engine and retain the lease
+    # for the whole server lifetime, matching the headless/container entrypoints.
+    with writer_lease(cfg.database):
+        app=create_app(cfg,model_path=args.model,infight_model_path=args.infight_model)
+        url=f"http://127.0.0.1:{args.port}"
+        print(f"\nOctagon / UFC Market Lab\n{url}\nHome: historical Practice (real past bouts + synthetic prices)\nAdvanced market source: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
+        if not args.no_browser:
+            threading.Timer(1.5,lambda:webbrowser.open(url)).start()
+        uvicorn.run(app,host="127.0.0.1",port=args.port,access_log=False)
 
 
 if __name__ == "__main__":

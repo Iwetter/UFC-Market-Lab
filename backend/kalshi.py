@@ -158,8 +158,9 @@ class KalshiRecorder:
             discovered = await self.rest.discover()
             old_tickers = set(self.engine.markets)
             for market in discovered:
-                self.engine.add_market(market)
                 event = self.events.get(market.event_ticker,{})
+                market=market.model_copy(update={'event_title':event.get('title','')})
+                self.engine.add_market(market)
                 if event.get("fee_type_override") is not None or event.get("fee_multiplier_override") is not None:
                     self.engine.fees[market.ticker] = FeeSchedule(event.get("fee_type_override") or series["fee_type"],D(str(event.get("fee_multiplier_override") if event.get("fee_multiplier_override") is not None else series["fee_multiplier"])),ts,self.engine.series_fee.valid_until_ms)
                 else: self.engine.fees[market.ticker] = self.engine.series_fee
@@ -196,7 +197,7 @@ class KalshiRecorder:
                         await self.resnapshot()
                 else:
                     book.snapshot(payload["yes_dollars"],payload["no_dollars"],ts)
-                self.engine.record_book(ticker,ts)
+                    self.engine.record_book(ticker,ts,{"source_protocol":"rest"})
         self.engine.health.update(rest="connected",last_rest_ms=now_ms(),error=None)
 
     async def polling(self):
@@ -247,7 +248,8 @@ class KalshiRecorder:
                             raise ValueError("WebSocket subscription rejected")
                         ticker = msg.get("msg",{}).get("market_ticker")
                         if ticker and ticker in self.engine.markets:
-                            if msg["type"] in {"orderbook_snapshot","orderbook_delta"}: self.engine.record_book(ticker,ts)
+                            if msg["type"] in {"orderbook_snapshot","orderbook_delta"}:
+                                self.engine.record_book(ticker,ts,{"source_protocol":"websocket","exchange_ts_ms":msg["msg"].get("ts_ms"),"sending_ts_ms":msg.get("sending_ts_ms")})
                             if msg["type"] == "market_lifecycle_v2": self.engine.lifecycle(msg["msg"],ts)
                         if msg["type"] == "event_fee_update":
                             # Immediately fail closed until REST metadata is refreshed.

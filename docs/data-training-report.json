@@ -1,0 +1,237 @@
+{
+  "source_repository": "https://github.com/nlbair/ufc-data",
+  "source_commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+  "source_manifest": {
+    "repository": "nlbair/ufc-data",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Noah Bair, UFC Data: scorecards, round statistics, and betting odds, 2013 to 2026, version 0.1.1. Sources: UFCStats, MMA Decisions, BestFightOdds, historical UFC rankings archive, UFCalendar rankings API.",
+    "retrieved_utc": "2026-10-29T04:25:31.429114+00:00",
+    "files": [
+      {
+        "path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663
+      },
+      {
+        "path": "SOURCES.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805
+      },
+      {
+        "path": "METHODS.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/METHODS.md",
+        "sha256": "193493dea65dcadba40d8cde3bbd2985fb7cc42596d2c0ced3c754560ca878fd",
+        "bytes": 3461
+      },
+      {
+        "path": "CITATION.cff",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708
+      },
+      {
+        "path": "data/ufc_all_fights_wide.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448
+      },
+      {
+        "path": "data/ufc_judge_rounds.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_judge_rounds.csv",
+        "sha256": "08a8c0162f201b538d5bd3177b3af11794f4d9730acdb0a775691510f0a0ba3b",
+        "bytes": 10691239
+      }
+    ],
+    "purpose": "retrospective research; no automatic trading approval"
+  },
+  "prefight_samples": {
+    "source_fights": 6743,
+    "samples": 3828,
+    "exclusions": {
+      "insufficient_lagged_history": 2790,
+      "nonbinary_or_overturned": 125
+    },
+    "embargo_days": 7,
+    "minimum_prior_bouts_per_fighter": 2,
+    "appearance_history_includes_nonbinary_bouts": true,
+    "stats_history_policy": "all source bouts with positive duration and observed statistic values; binary W/L and Elo updates exclude nonbinary outcomes",
+    "observed_publication_timestamps": false,
+    "warning": "Retrospective current-snapshot reconstruction. Not admissible as recorded forward predictions or market-edge evidence."
+  },
+  "round_scoring_samples": {
+    "source_judge_rows": 29937,
+    "unique_fight_rounds": 10075,
+    "samples": 9866,
+    "exclusions": {
+      "not_three_judges": 196,
+      "nonbinary_round_score": 13
+    },
+    "target": "majority_judge_round_winner",
+    "decision_only_selection": true
+  },
+  "source_date_range": [
+    "2013-02-16",
+    "2026-10-10"
+  ],
+  "not_a_trading_edge_result": true,
+  "observed_market_fight_delay_seconds": null,
+  "position_limitations": "Distance/clinch/ground describe strike contexts. Mount, guard, back-control occupancy and transition timestamps are absent; no probabilities for those positions are inferred.",
+  "prefight_evaluation": {
+    "target": "prefight_fight_winner",
+    "research_only": true,
+    "approved_for_trading": false,
+    "ece_definition": "10 fixed equal-width probability bins; tied probabilities stay together",
+    "partition": {
+      "train": {
+        "rows": 2521,
+        "bouts": 2521,
+        "events": 376,
+        "first_date": "2013-11-06",
+        "last_date": "2022-12-17"
+      },
+      "calibration": {
+        "rows": 315,
+        "bouts": 315,
+        "events": 43,
+        "first_date": "2023-01-14",
+        "last_date": "2023-12-16"
+      },
+      "test": {
+        "rows": 992,
+        "bouts": 992,
+        "events": 119,
+        "first_date": "2024-01-13",
+        "last_date": "2026-10-10"
+      },
+      "excluded_boundary_rows": 0
+    },
+    "calibration_metrics": {
+      "n": 315,
+      "log_loss": 0.6648217831922337,
+      "brier": 0.23661329574921752,
+      "ece": 0.06031675731723448
+    },
+    "test_metrics": {
+      "n": 992,
+      "log_loss": 0.6559934658553317,
+      "brier": 0.23197749945264345,
+      "ece": 0.031107952830648947
+    },
+    "test_coinflip_metrics": {
+      "n": 992,
+      "log_loss": 0.6931471805599453,
+      "brier": 0.25,
+      "ece": 0.006048387096774188
+    },
+    "test_accuracy": 0.6229838709677419,
+    "test_by_year": {
+      "2024": {
+        "n": 359,
+        "log_loss": 0.6541229813669862,
+        "brier": 0.23111219490669796,
+        "ece": 0.04116432406745129
+      },
+      "2025": {
+        "n": 349,
+        "log_loss": 0.6602370059624203,
+        "brier": 0.2338377604568762,
+        "ece": 0.055126861876321535
+      },
+      "2026": {
+        "n": 284,
+        "log_loss": 0.6531431434396348,
+        "brier": 0.23078529255657743,
+        "ece": 0.05233501014930109
+      }
+    },
+    "model_sha256": "2c158e1e01dbebfb7e824fed11b5f818cac28450b73932bd9aa6a06c8dbd2169",
+    "test_input_sha256": "b1e341b4f8b05a760fec517ce44680d8d1626ea27baf0fd1253fd4e0d64f19c8",
+    "all_input_sha256": "1fc5337b4f5c387e779aeaf99fe4ae7adeab57759b589e0223c42086830d688b",
+    "statement": "Descriptive historical predictive evaluation only. No Kalshi data, costs, execution or trading returns evaluated.",
+    "test_elo_metrics": {
+      "n": 992,
+      "log_loss": 0.6827735198274034,
+      "brier": 0.24484977238838282,
+      "ece": 0.020704942204152112
+    }
+  },
+  "prefight_artifact": "artifacts\\research\\prefight.json",
+  "round_scoring_evaluation": {
+    "target": "majority_judge_round_winner",
+    "research_only": true,
+    "approved_for_trading": false,
+    "ece_definition": "10 fixed equal-width probability bins; tied probabilities stay together",
+    "partition": {
+      "train": {
+        "rows": 6780,
+        "bouts": 2156,
+        "events": 396,
+        "first_date": "2013-02-16",
+        "last_date": "2022-12-17"
+      },
+      "calibration": {
+        "rows": 793,
+        "bouts": 248,
+        "events": 43,
+        "first_date": "2023-01-14",
+        "last_date": "2023-12-16"
+      },
+      "test": {
+        "rows": 2293,
+        "bouts": 721,
+        "events": 118,
+        "first_date": "2024-01-13",
+        "last_date": "2026-10-10"
+      },
+      "excluded_boundary_rows": 0
+    },
+    "calibration_metrics": {
+      "n": 793,
+      "log_loss": 0.37120497386794493,
+      "brier": 0.11658557127742658,
+      "ece": 0.024850553877892652
+    },
+    "test_metrics": {
+      "n": 2293,
+      "log_loss": 0.36455723419684716,
+      "brier": 0.11377705350942556,
+      "ece": 0.024250514580470877
+    },
+    "test_coinflip_metrics": {
+      "n": 2293,
+      "log_loss": 0.6931471805599454,
+      "brier": 0.25,
+      "ece": 0.0028347143480157433
+    },
+    "test_accuracy": 0.8438726559092892,
+    "test_by_year": {
+      "2024": {
+        "n": 894,
+        "log_loss": 0.36096439520490936,
+        "brier": 0.11260065998437883,
+        "ece": 0.03210903261443685
+      },
+      "2025": {
+        "n": 811,
+        "log_loss": 0.38720808715454363,
+        "brier": 0.1205749506606561,
+        "ece": 0.030019116042439245
+      },
+      "2026": {
+        "n": 588,
+        "log_loss": 0.33877858846572545,
+        "brier": 0.10618964062123472,
+        "ece": 0.047646337451006215
+      }
+    },
+    "model_sha256": "62e1e3157ab71385d7976b02b399925059d2afc9537f6e852595ef68ae478f35",
+    "test_input_sha256": "3f3da920a60cf51f593e23940911bb8683b23adbd71a621c1b5bc8638e3c1067",
+    "all_input_sha256": "d4bf3e840532acec89d91e35456115020f2399c404aecc606594239d21ff46cf",
+    "statement": "Descriptive historical predictive evaluation only. No Kalshi data, costs, execution or trading returns evaluated."
+  },
+  "round_scoring_artifact": "artifacts\\research\\round_scoring.json"
+}

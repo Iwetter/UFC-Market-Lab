@@ -1,0 +1,107 @@
+{
+  "kind": "historical_research_baseline",
+  "target": "prefight_fight_winner",
+  "features": [
+    "elo_diff",
+    "observed_win_rate_diff",
+    "experience_diff",
+    "layoff_years_diff",
+    "sig_landed_rate_diff",
+    "sig_absorbed_rate_diff",
+    "takedown_rate_diff",
+    "submission_attempt_rate_diff",
+    "control_share_diff",
+    "knockdown_rate_diff",
+    "distance_strike_rate_diff",
+    "clinch_strike_rate_diff",
+    "ground_strike_rate_diff"
+  ],
+  "coef": [
+    0.21146998979696197,
+    0.038368445861789384,
+    -0.016895866268728004,
+    -0.05688609325366507,
+    0.13216982334789368,
+    -0.2226492333394535,
+    0.09690238064205049,
+    0.010075857258647037,
+    0.029789878051656574,
+    -0.06277892415218267,
+    0.13417343462889592,
+    -0.03776908793413281,
+    0.045336545289414706
+  ],
+  "scale": [
+    28.025361074365346,
+    0.12191699020093624,
+    0.5984943356290667,
+    0.5148548460035857,
+    1.8076435545590184,
+    1.7105723825740955,
+    0.13321585798074176,
+    0.07629243718328473,
+    0.20697113777341064,
+    0.06671241477540835,
+    1.6630473387394846,
+    0.5756989045079026,
+    0.8276496199795371
+  ],
+  "temperature": 0.9108528040787808,
+  "research_only": true,
+  "approved_for_trading": false,
+  "market_probability_input": false,
+  "train_end": "2022-12-31",
+  "calibration_end": "2023-12-31",
+  "assumed_publication_embargo_days": 7,
+  "observed_availability_timestamps": false,
+  "source_manifest": {
+    "repository": "nlbair/ufc-data",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Noah Bair, UFC Data: scorecards, round statistics, and betting odds, 2013 to 2026, version 0.1.1. Sources: UFCStats, MMA Decisions, BestFightOdds, historical UFC rankings archive, UFCalendar rankings API.",
+    "files": [
+      {
+        "path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663
+      },
+      {
+        "path": "SOURCES.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805
+      },
+      {
+        "path": "METHODS.md",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/METHODS.md",
+        "sha256": "193493dea65dcadba40d8cde3bbd2985fb7cc42596d2c0ced3c754560ca878fd",
+        "bytes": 3461
+      },
+      {
+        "path": "CITATION.cff",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708
+      },
+      {
+        "path": "data/ufc_all_fights_wide.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448
+      },
+      {
+        "path": "data/ufc_judge_rounds.csv",
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_judge_rounds.csv",
+        "sha256": "08a8c0162f201b538d5bd3177b3af11794f4d9730acdb0a775691510f0a0ba3b",
+        "bytes": 10691239
+      }
+    ],
+    "purpose": "retrospective research; no automatic trading approval"
+  },
+  "input_sha256": "1e61ba67c983e0d6cdfe8275f46aae3f71dd3cc28e70e5c419f3f2ee08a9594e",
+  "fitted_input_hash_scope": "training_and_calibration_rows_only",
+  "warning": "Current-snapshot retrospective reconstruction. Calibration-set fitting and test metrics are not a market-edge result or live-trading authorization.",
+  "spec_sha256": "2c158e1e01dbebfb7e824fed11b5f818cac28450b73932bd9aa6a06c8dbd2169"
+}
