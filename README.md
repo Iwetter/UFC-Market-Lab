@@ -2,7 +2,7 @@
 
 **An event-sourced market-data research platform with deterministic replay and paper execution.**
 
-A Python/FastAPI backend and React/TypeScript dashboard for collecting market observations, maintaining order books, replaying events, applying risk gates, and inspecting simulated orders, positions, and accounting.
+Start with **historical Practice**: choose a real past UFC fight and watch the bot generate automatic fake-money buys and sales. The trained pre-fight prediction is real research; practice prices are explicitly synthetic. The Python/FastAPI and React platform also records public market observations, applies risk gates, and supports separate live-data PAPER experiments.
 
 ## Architecture
 
@@ -19,10 +19,10 @@ flowchart LR
 
 ## Watch historical Practice
 
-Requires Python 3.12+ and Node.js 20.19+ or 22.12+. The Practice upgrade is currently on the development branch in PR #1; these commands select that branch until it is merged:
+Requires Python 3.12+ and Node.js 20.19+ or 22.12+. Historical Practice and the current research platform are available on `main`:
 
 ```powershell
-git clone --branch research/data-latency-2026-10-29 https://github.com/Iwetter/UFC-Market-Lab.git
+git clone https://github.com/Iwetter/UFC-Market-Lab.git
 cd UFC-Market-Lab
 python start.py --prepare-data
 ```

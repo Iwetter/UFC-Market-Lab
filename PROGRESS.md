@@ -1,6 +1,6 @@
 # Progress — October 29, 2026
 
-Repo Iwetter/UFC-Market-Lab; current checkout is this directory. Branch research/data-latency-2026-10-29, draft PR https://github.com/Iwetter/UFC-Market-Lab/pull/1 (not merged). Existing same-chat daily 05:15 America/New_York continuation remains active; no duplicate schedule. Read AGENTS.md and ROADMAP.md; acquire the development lease before edits.
+Repo Iwetter/UFC-Market-Lab; current checkout is this directory. Current local/default branch: main. PR https://github.com/Iwetter/UFC-Market-Lab/pull/1 is merged (merge commit 25870de); the Practice app and all accumulated research/recording code are published on main. Future implementation starts on a new scoped branch from main, not the merged PR. Existing same-chat daily 05:15 America/New_York continuation remains active; no duplicate schedule. Read AGENTS.md and ROADMAP.md; acquire the development lease before edits.
 
 ## User-visible priority: watch the bot practice
 
@@ -21,7 +21,7 @@ Real bout identity, date, result and completed-round aggregates come from the pi
 
 ## Verification / next task
 
-Full integration: 197 Python + 4 frontend tests, TypeScript/Vite production build passed. After final search/isolation/error-display changes, 22 focused practice/API tests and rebuilt dashboard passed. Browser completed a real cached Gerald Meerschaert/Julius Walker replay: automatic NO buys and reduce-only sales visibly filled, pause worked, completed-round stats appeared and actual result was revealed at recorded finish. This is synthetic-market execution verification, not returns evidence. Earlier remote cc82b22 CI passed all four OS/Python variants; check the current PR's CI after this milestone push.
+Full integration: 197 Python + 4 frontend tests, TypeScript/Vite production build passed. After final search/isolation/error-display changes, 22 focused practice/API tests and rebuilt dashboard passed. Browser completed a real cached Gerald Meerschaert/Julius Walker replay: automatic NO buys and reduce-only sales visibly filled, pause worked, completed-round stats appeared and actual result was revealed at recorded finish. This is synthetic-market execution verification, not returns evidence. Final implementation head 0e7fc57 passed all four Windows/Linux and Python 3.12/3.13 CI variants (run 40831389362), verified again before merging. Only publication documentation changed afterward; no code/model tests or training were repeated.
 
 The practice launcher is `python start.py --prepare-data`; use existing cached files, never retrain at startup. docs/PRACTICE.md explains real versus synthetic data and exact controls. Current user-facing local preview runs on 127.0.0.1:8004 for this handoff; it is not cloud deployment or an always-on recorder.
 

@@ -12,3 +12,5 @@
 - Save reviewable Git changes without overwriting others. Update concise progress only on meaningful changes, including actual checks, limitations and next task. Do not create another conversation or duplicate automation.
 
 - Primary UX is historical Practice: one Start button, visible automatic decisions/orders, separated synthetic prices, fixed pre-fight probability and hidden future results. Preserve practice-account isolation; never present scenario P&L as historical exchange returns. Product gaps and acceptance criteria are in docs/PRODUCT_ISSUES.md.
+
+- PR #1 is merged and main contains historical Practice. Begin future implementation on a new scoped branch from current main; do not append commits to the merged research/data-latency-2026-10-29 PR. Main publication documentation may be updated directly when authorized.
