@@ -41,3 +41,5 @@ At the October 21 baseline, the GitHub Actions workflow had not run remotely; Li
 - Public SNTP did return a measured host offset of about -0.72 seconds with low sample delay. The offset-plus-uncertainty execution gate blocked correctly; no system time was modified and no zero offset fabricated.
 - Frozen/reused holdout metrics and split limitations are documented in model-comparison.json and ml-pipeline.md. No genuine-market strategy fill, return, authenticated stream, International network integration, credentialed live-feed packet, Docker/cloud execution or in-fight predictive calibration is claimed.
 - Existing remote PR CI passed on 6a90613; check current PR for latest commit's CI. Existing daily 05:15 continuation is unchanged.
+
+Clean-runner CI on a6a5813 exposed one test relying on the unversioned local data cache (175 passed, one failed). The test now creates a labeled synthetic CSV/manifest/artifact fixture and verifies hashes, inference provenance and missing-source failure without network access. It no longer assumes developer-machine data. No runtime validation or source pins were weakened.

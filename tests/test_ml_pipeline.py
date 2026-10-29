@@ -1,5 +1,7 @@
 """Synthetic leakage/boundary tests; performance comes only from cached real data."""
 import json
+import csv
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -102,24 +104,35 @@ def test_service_missing_artifact_fails_closed(tmp_path):
         service.predict("a", "b", 1, 1)
 
 
-def test_trained_service_returns_asof_provenance_and_rejects_pretraining_cutoff():
-    root = Path(__file__).resolve().parents[1]
-    if not (root/"artifacts/ml/selected.json").exists():
-        pytest.skip("run scripts/train_models.py to generate reviewed artifact")
-    service = PredictionService(root)
-    assert service.status()["available"] is True
-    identities = service.fighters()
-    assert all(r["id"] and r["name"] and r["aliases"] for r in identities)
-    with pytest.raises(ValueError, match="predates"):
-        service.predict(identities[0]["id"], identities[1]["id"], ms("2026-11-01"), ms("2020-01-01"))
-    rows = service.rows
-    # A real historical pair with sufficient source history, evaluated after snapshot end.
-    pair = build_prefight_samples(rows)[0][-1]
-    result = service.predict(pair["fighter_a_id"], pair["fighter_b_id"], ms("2026-11-01"), ms("2026-10-29"))
-    assert 0 < result["probability_a"] < 1
-    assert result["features_asof_ms"] == ms("2026-10-29")
-    assert result["trained_through_ms"] <= result["features_asof_ms"]
-    assert result["eligible_for_live"] is False and result["approved_for_trading"] is False
+def test_trained_service_returns_asof_provenance_and_rejects_pretraining_cutoff(tmp_path,history,monkeypatch):
+    # A complete, hash-verified synthetic source fixture keeps clean CI offline.
+    # Real sample counts/performance remain in the versioned comparison report.
+    rows=[r|{'f1_name':'Fixture Alpha','f2_name':'Fixture Beta'} for r in history]
+    directory=tmp_path/'data/research/nlbair';source=directory/'data/ufc_all_fights_wide.csv'
+    source.parent.mkdir(parents=True)
+    with source.open('w',newline='',encoding='utf-8') as stream:
+        writer=csv.DictWriter(stream,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+    commit='offline-test-fixture'
+    monkeypatch.setattr('backend.ml_pipeline.SOURCE_COMMIT',commit)
+    monkeypatch.setattr('backend.ml_pipeline.SOURCE_FILES',{'data/ufc_all_fights_wide.csv':hashlib.sha256(source.read_bytes()).hexdigest()})
+    (directory/'manifest.json').write_text(json.dumps({'commit':commit,'fixture_only':True}),encoding='utf-8')
+    artifact=seal(fit_candidate('logistic_c0.1',candidate_rows())|{'trained_through':'2023-12-31'})
+    model_path=tmp_path/'artifacts/ml/selected.json';model_path.parent.mkdir(parents=True)
+    model_path.write_text(json.dumps(artifact),encoding='utf-8')
+    service=PredictionService(tmp_path)
+    assert service.status()['available'] is True
+    identities=service.fighters()
+    assert all(r['id'] and r['name'] and r['aliases'] for r in identities)
+    with pytest.raises(ValueError,match='predates'):
+        service.predict('a','b',ms('2026-11-01'),ms('2020-01-01'))
+    result=service.predict('a','b',ms('2026-11-01'),ms('2026-10-29'))
+    assert 0<result['probability_a']<1
+    assert result['features_asof_ms']==ms('2026-10-29')
+    assert result['trained_through_ms']<=result['features_asof_ms']
+    assert result['eligible_for_live'] is False and result['approved_for_trading'] is False
+    # An actually missing source must still fail closed, never use zero history.
+    source.unlink()
+    assert PredictionService(tmp_path).status()['available'] is False
 
 
 def test_chronological_partitions_keep_event_dates_disjoint():
