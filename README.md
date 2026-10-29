@@ -48,6 +48,10 @@ Open the **Research** tab to inspect actual sample counts, chronological holdout
 
 For a server with Docker, `docker compose up -d --build` starts the single-writer PAPER recorder and private dashboard. Docker was not available in development; container build and cloud provisioning remain unverified. No server or feed subscription was purchased.
 
+## Profit taking and pullback re-entry
+
+Practice and Live PAPER share one policy: enter on a net model edge, take configurable net profits even while the fighter remains favored, then require a pullback and a fresh edge before re-entry. Partial exits/scaling and fee-inclusive completed cycles are visible. Charts mark actual fills. [Strategy details and chronological validation](docs/PROFIT_STRATEGY.md). No trade count is targeted; live in-fight execution still requires a validated timestamped model/feed.
+
 ## Automatic experimental PAPER research
 
 Run `python start.py --source kalshi --prepare-data` for public Kalshi data and the fitted historical model. In **Live PAPER**, review the exact bout, canonical fighters, card, settlement rules and earliest start; then enable the deterministic PAPER strategy. It opens/closes simulated YES/NO holdings through the existing latency/depth/fee/risk broker. No real order route is added. Fresh clock observations and every execution gate must pass.

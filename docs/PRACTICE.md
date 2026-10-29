@@ -46,8 +46,12 @@ mapping forms or host time synchronization for this isolated simulation.
 
 The synthetic price path deliberately exercises changing market conditions. A
 run may contain buys and sales, or no trade if the policy finds no qualifying
-edge. It does not force orders just to make the screen look active. A five-order
-run cap, cooldown and simulated risk limits can stop further entries.
+edge. It does not force orders just to make the screen look active. A configurable entry order ceiling, cooldown and simulated risk limits can stop
+further entries. Reducing exits are not blocked by the entry ceiling or cooldown.
+Profit-taking can sell while the model still favors the outcome; re-entry needs
+a pullback from an actual exit plus a current favorable edge. Partial exits and
+scaling controls are available in the shared strategy panel. See
+[profit-taking policy and cycle validation](PROFIT_STRATEGY.md).
 
 This flow lets you judge how the bot responds to prices and compare its fixed
 prediction with a historical result. **Practice P&L is not a historical exchange

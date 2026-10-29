@@ -34,10 +34,14 @@ contract only when edge exceeds five cents **after** executable price, rounded
 fees, slippage and a five-percentage-point probability buffer. The buffer is a
 policy assumption, not a statistical confidence interval. Existing holdings are
 sold reduce-only if conservative sale value exceeds holding value by two cents
-after costs and buffer. NO-outcome SELL remains a sale of NO, never a YES buy.
-There is no shorting, opposite holding or repeated averaging into an existing
-position. Portfolio caps, daily spend/loss/drawdown gates, one pending order per
-market, 60-second cooldown and five orders per market/day apply.
+after costs and buffer. A separate configurable cash-profit target now permits
+selling a still-favored holding. Full/partial profit-taking uses fee-inclusive
+average entry cost; another partial take needs an improved net price. Scaling is
+optional, capped and requires its own pullback. Re-entry requires a pullback from
+the last actual sale plus a new cost-adjusted entry edge. Cooldown and the optional
+daily order ceiling restrict entries, not reducing exits; no trade count is a
+target. Existing loss/exposure/cash/position checks still apply. See
+[profit-taking strategy](PROFIT_STRATEGY.md).
 
 Signals are evaluated at most once per second, with no LLM calls. Simulated IOC
 orders arrive after configured latency and use the then-current book, partial

@@ -4,24 +4,18 @@ from __future__ import annotations
 import re
 import unicodedata
 from functools import lru_cache
-from decimal import ROUND_CEILING, ROUND_FLOOR
 from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
 from pydantic import Field
 
-from .domain import D, ONE, ZERO, OrderIntent, StrictModel, digest
+from .domain import D, ONE, ZERO, OrderIntent, StrictModel, digest, now_ms
+from .strategy import ProfitPolicy,StrategyLedger,decide_trade
+from .execution import risk_reasons
 
 
-class AutoPaperSettings(StrictModel):
+class AutoPaperSettings(ProfitPolicy):
     enabled: bool = False
-    min_entry_edge: D = Field(default=D('.05'), ge=D('.01'), le=D('.5'))
-    min_exit_edge: D = Field(default=D('.02'), ge=0, le=D('.5'))
-    probability_buffer: D = Field(default=D('.05'), ge=D('.02'), le=D('.4'))
-    cooldown_ms: int = Field(default=60000, ge=10000, le=86400000)
-    max_orders_per_market_day: int = Field(default=5, ge=1, le=20)
-    contracts: int = Field(default=1, ge=1, le=10)
-    # Stop before the declared earliest plausible start; never extend into live fighting.
     start_guard_ms: int = Field(default=300000, ge=60000, le=86400000)
 
 
@@ -116,6 +110,7 @@ class AutoPaper:
             'fighter_a':a['name'],'fighter_b':b['name']}
         with self.engine.store.transaction():
             self.engine.confirm_mapping(market.ticker,bout_id,review.card_id,a['name'],b['name'],review.yes_is_a,review.rounds,ts)
+            self.engine.persist_fights()
             self.fixtures[market.ticker] = fixture
             self.predictions[market.ticker] = prediction | {'generated_ms':ts}
             self.engine.store.put('autopaper_fixtures',self.fixtures)
@@ -188,46 +183,11 @@ class AutoPaper:
                 'input_ms':prediction['features_asof_ms'],'book_ms':book.updated_ms,
                 'uncertainty_note':'Conservative policy buffer; not a statistical confidence interval.',
                 'probability_buffer':str(self.settings.probability_buffer)}
-            orders = self.engine.broker.orders()
-            if any(o['status']=='pending' and o['intent']['ticker']==ticker for o in orders):
-                self._record(ticker,ts,base|{'action':'HOLD','reasons':['order_pending']});continue
-            if ts-self.last_attempt.get(ticker,0)<self.settings.cooldown_ms:
-                self._record(ticker,ts,base|{'action':'HOLD','reasons':['cooldown']});continue
-            from .execution import date_utc,risk_reasons
-            if sum(o['intent']['ticker']==ticker and date_utc(o['created_ms'])==date_utc(ts) for o in orders)>=self.settings.max_orders_per_market_day:
-                self._record(ticker,ts,base|{'reasons':['daily_market_order_cap']});continue
-            positions = [x for x in self.engine.broker.positions.values() if x['ticker']==ticker and D(x['quantity'])>0]
-            candidates = []
-            for outcome in ('yes','no'):
-                fair = p if outcome=='yes' else ONE-p
-                pos = next((x for x in positions if x['outcome']==outcome),None)
-                action = 'sell' if pos else 'buy'
-                if positions and not pos:continue
-                levels = book.bids(outcome) if pos else book.asks(outcome)
-                if not levels or fee is None:continue
-                price,depth = levels[0]
-                target = price-self.engine.cfg.slippage if pos else price+self.engine.cfg.slippage
-                choices = []
-                for band in context['market'].price_ranges:
-                    yes_target = target if outcome=='yes' else ONE-target
-                    rounding = ROUND_CEILING if (action=='buy')==(outcome=='yes') else ROUND_FLOOR
-                    yes_price = band.start+((yes_target-band.start)/band.step).to_integral_value(rounding=rounding)*band.step
-                    limit = yes_price if outcome=='yes' else ONE-yes_price
-                    if context['market'].on_grid(yes_price) and (limit<=target if pos else limit>=target):choices.append(limit)
-                if not choices:continue
-                limit = max(choices) if pos else min(choices)
-                quantity = min(D(self.settings.contracts),depth*self.engine.cfg.max_participation,self.engine.cfg.max_order_contracts)
-                if pos:quantity=min(quantity,D(pos['quantity']))
-                quantum = D('.01') if context['market'].fractional_trading_enabled else ONE
-                quantity=(quantity/quantum).to_integral_value(rounding=ROUND_FLOOR)*quantum
-                if quantity<=0:continue
-                cost=fee.fee(limit,quantity).quantize(D('.01'),rounding=ROUND_CEILING)/quantity
-                edge=(limit-fair if pos else fair-limit)-cost-self.settings.probability_buffer
-                threshold=self.settings.min_exit_edge if pos else self.settings.min_entry_edge
-                if edge>=threshold:candidates.append((edge,outcome,action,limit,quantity))
-            if not candidates:
-                self._record(ticker,ts,base|{'action':'HOLD' if positions else 'NO-TRADE','reasons':['no_net_edge_after_costs_and_buffer']});continue
-            edge,outcome,action,limit,quantity=max(candidates)
+            choice=decide_trade(self.engine.broker,ticker,context,self.engine.cfg,self.settings,p,ts,self.last_attempt.get(ticker,0))
+            base |= {'strategy':choice['metrics']}
+            if choice['action'] not in ('BUY','SELL'):
+                self._record(ticker,ts,base|choice);continue
+            edge,outcome,action,limit,quantity=(choice['net_edge_after_buffer'],choice['outcome'],choice['action'].lower(),choice['limit'],choice['quantity'])
             # Persist a monotonic sequence with the intent before submission: no restart duplicates.
             sequence=self.engine.store.get('autopaper_sequence',0)+1
             intent=OrderIntent(id=str(uuid5(NAMESPACE_URL,f'ufc-autopaper:{self.engine.store.session}:{ticker}:{sequence}')),
@@ -242,10 +202,14 @@ class AutoPaper:
                 order=self.engine.submit(intent,ts)
                 self._record(ticker,ts,base|{'action':action.upper(),'outcome':outcome,'limit':str(limit),
                     'quantity':str(quantity),'net_edge_after_buffer':str(edge),'order_id':order['id'],
-                    'reasons':order['reasons'] or ['net_execution_edge_exceeds_policy_threshold']})
+                    'reasons':order['reasons'] or choice['reasons']})
 
     def snapshot(self):
-        return {'settings':self.settings.model_dump(mode='json'),'fixtures':self.fixtures,
+        strategy={}
+        for ticker in self.fixtures:
+            c=self.engine.context(ticker)
+            strategy[ticker]=StrategyLedger(self.engine.broker,ticker).snapshot(c['book'],c['fees'],self.engine.cfg,self.settings,self.probability(ticker,now_ms()))
+        return {'settings':self.settings.model_dump(mode='json'),'strategy':strategy,'fixtures':self.fixtures,
             'predictions':self.predictions,'decisions':list(self.decisions.values()),
             'model':self.service.status() if self.service else {'available':False,'error':self._load_error},
             'scope':'Experimental pre-fight Kalshi PAPER only; never an in-fight or live-money model.'}

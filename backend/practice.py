@@ -26,6 +26,7 @@ from .fees import FeeSchedule
 from .historical import ATTRIBUTION, SOURCE_COMMIT, number
 from .prediction_service import PredictionService
 from .store import Store
+from .strategy import StrategyLedger,decide_trade
 
 
 LIMITATIONS = [
@@ -68,6 +69,7 @@ class PracticeController:
         self.status = "idle"
         self.speed = 30.
         self.run_id = None
+        self.policy = AutoPaperSettings(enabled=True)
         self._wall_mark = time.monotonic()
 
     @property
@@ -143,7 +145,6 @@ class PracticeController:
         self.cfg = Settings(mode='replay', source='mock', database=str(self.run_directory/'practice.sqlite3'))
         self.store = Store(self.cfg.database)
         self.broker = PaperBroker(self.store, self.cfg)
-        self.policy = AutoPaperSettings(enabled=True)
         self.row, self.fight, self.a_id, self.b_id = dict(row), dict(public), a, b
         self.prediction = prediction
         self.start_ms = _day_ms(row['event_date'])
@@ -213,42 +214,22 @@ class PracticeController:
         self.store.append('practice_strategy','decision',record,recv_utc_ns=self.ts*1_000_000)
 
     def _decide(self):
+        if not self.policy.enabled:
+            self._record('NO-TRADE',['automation_disabled']);return
         if self.risk_stop:
             self._record('NO-TRADE',[self.risk_stop]); return
-        orders = self.broker.orders()
-        positions = [p for p in self.broker.positions.values() if D(p['quantity'])>0]
-        if any(o['status']=='pending' for o in orders):
-            self._record('HOLD',['order_pending']); return
-        if self.last_attempt is not None and self.ts-self.last_attempt < self.policy.cooldown_ms:
-            self._record('HOLD',['cooldown']); return
-        if len(orders) >= self.policy.max_orders_per_market_day:
-            self._record('HOLD' if positions else 'NO-TRADE',['practice_run_order_cap']); return
-        candidates = []
-        p = D(str(self.prediction['probability_a']))
-        fee = self._context(self.ticker)['fees']
-        for outcome in ('yes','no'):
-            fair = p if outcome=='yes' else ONE-p
-            pos = next((x for x in positions if x['outcome']==outcome),None)
-            if positions and not pos:
-                continue
-            price, depth = (self.book.bids(outcome) if pos else self.book.asks(outcome))[0]
-            limit = price-self.cfg.slippage if pos else price+self.cfg.slippage
-            quantity = min(D(self.policy.contracts),depth*self.cfg.max_participation,self.cfg.max_order_contracts)
-            if pos:
-                quantity = min(quantity,D(pos['quantity']))
-            cost = fee.fee(limit,quantity).quantize(D('.01'),rounding='ROUND_CEILING')/quantity
-            edge = (limit-fair if pos else fair-limit)-cost-self.policy.probability_buffer
-            if edge >= (self.policy.min_exit_edge if pos else self.policy.min_entry_edge):
-                candidates.append((edge,outcome,'sell' if pos else 'buy',limit,quantity))
-        if not candidates:
-            self._record('HOLD' if positions else 'NO-TRADE',['no_net_edge_after_costs_and_buffer']); return
-        edge,outcome,action,limit,quantity = max(candidates)
+        choice=decide_trade(self.broker,self.ticker,self._context(self.ticker),self.cfg,self.policy,
+                            self.prediction['probability_a'],self.ts,self.last_attempt or 0)
+        if choice['action'] not in ('BUY','SELL'):
+            self._record(choice['action'],choice['reasons'],strategy=choice['metrics']);return
+        edge,outcome,action,limit,quantity=(choice['net_edge_after_buffer'],choice['outcome'],choice['action'].lower(),choice['limit'],choice['quantity'])
+        orders=self.broker.orders()
         intent = OrderIntent(id=uuid5(NAMESPACE_URL,f'{self.run_id}:{len(orders)}'),ticker=self.ticker,
                              outcome=outcome,action=action,count=str(quantity),limit_price=str(limit))
         order = self.broker.submit(intent,self.ts,self._context(self.ticker))
         self.last_attempt = self.ts
         self._record(action.upper() if order['status']=='pending' else 'NO-TRADE',
-                     order['reasons'] or ['net_execution_edge_exceeds_policy_threshold'],
+                     order['reasons'] or choice['reasons'],
                      outcome=outcome,limit=str(limit),quantity=str(quantity),order_id=order['id'],net_edge_after_buffer=str(edge))
 
     def _checkpoint(self):
@@ -357,7 +338,7 @@ class PracticeController:
         if self._last_snapshot is not None:
             return json.loads(canonical(self._last_snapshot))
         if self.store is None:
-            return {'status':'idle','run_id':None,'sources':SOURCES,'limitations':LIMITATIONS}
+            return {'status':'idle','run_id':None,'sources':SOURCES,'limitations':LIMITATIONS,'policy':self.policy.model_dump(mode='json')}
         result = {'status':self.status, 'run_id':self.run_id, 'speed':self.speed, 'mode':'PRACTICE',
                   'closed':self._closed,'fight':self.fight, 'elapsed_s':self.elapsed_ms/1000,
                   'duration_s':self.duration_ms/1000, 'round':min(int(self.row['scheduled_rounds']),max(1,math.ceil(self.elapsed_ms/300_000))),
@@ -372,8 +353,17 @@ class PracticeController:
                           'daily_drawdown_cap':str(self.cfg.daily_drawdown),'daily_loss_cap':str(self.cfg.max_daily_loss)},
                   'sources':SOURCES, 'limitations':LIMITATIONS, 'artifacts':{'run_id':self.run_id,
                   'manifest':'manifest.json','journal':'practice.sqlite3','summary':'summary.json'},
-                  'live_eligible':False}
+                  'live_eligible':False,'policy':self.policy.model_dump(mode='json'),
+                  'strategy':StrategyLedger(self.broker,self.ticker).snapshot(self.book,FeeSchedule(verified_ms=self.ts),self.cfg,self.policy,self.prediction['probability_a'])}
         return json.loads(canonical(result))
+
+    def configure(self,policy):
+        policy=AutoPaperSettings.model_validate(policy)
+        self.policy=policy
+        if self.store is not None:
+            self.store.append('operator','practice_policy',policy,recv_utc_ns=self.ts*1000000)
+            self.store.put('practice_policy',policy.model_dump(mode='json'))
+        return self.snapshot()
 
     def _write_summary(self):
         (self.run_directory/'summary.json').write_text(json.dumps(self.snapshot(),indent=2),encoding='utf-8')

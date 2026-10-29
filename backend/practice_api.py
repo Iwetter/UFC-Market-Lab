@@ -6,6 +6,7 @@ from fastapi import APIRouter,Depends,Query
 from pydantic import Field
 
 from .domain import StrictModel
+from .autopaper import AutoPaperSettings
 
 
 class StartPractice(StrictModel):
@@ -41,6 +42,10 @@ def practice_router(controller,operator):
             if getattr(controller,'runtime_error',None):
                 raise ValueError('practice worker stopped; restart the server before starting another session')
             return controller.start(request.fight_id,speed=request.speed)
+
+    @router.post('/settings',dependencies=[Depends(operator)])
+    async def settings(request:AutoPaperSettings):
+        return controller.configure(request)
 
     @router.post('/control',dependencies=[Depends(operator)])
     async def control(request:PracticeControl):
