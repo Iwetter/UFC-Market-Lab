@@ -1,6 +1,6 @@
 # Connect a historical prediction to automatic PAPER orders
 
-The **Automation** dashboard tab runs a deterministic experimental pre-fight
+The **Live PAPER** dashboard tab runs a deterministic experimental pre-fight
 strategy, separately from approved execution models and the isolated live CLI.
 No live gateway is imported. Historical artifacts never acquire live approval.
 This is an execution experiment, with no observed market advantage or returns.
@@ -18,7 +18,7 @@ fitted JSON and comparative scores are versioned. To reproduce the bounded
 comparison once, use `python scripts/train_models.py`; matching runs use its
 content/config/code/version cache. Do not force unchanged training.
 
-In Workspace select a genuine bout-winner market, then open Automation. Choose
+In Workspace select a genuine bout-winner market, then open Live PAPER. Choose
 the exact historical fighter IDs, the YES fighter, the shared UFC card ID and
 an independently verified **earliest plausible start**, with its source. Read
 both complete settlement-rule fields and confirm the binding. The server checks
@@ -83,3 +83,5 @@ docker compose restart recorder
 Docker execution has not been verified on this host. No cloud service, paid feed
 or authenticated trading account was activated. The daily Codex continuation
 develops code; normal recorder/strategy services run independently of it.
+
+For the simpler old-fight user flow, open the default **Practice** screen instead. It has no real-market setup gates and uses a separately labeled synthetic market/account; see [Practice](PRACTICE.md). The advanced Workspace tab is now labeled **Manual orders**.

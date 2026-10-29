@@ -69,7 +69,7 @@ def main():
     with writer_lease(cfg.database):
         app=create_app(cfg,model_path=args.model,infight_model_path=args.infight_model)
         url=f"http://127.0.0.1:{args.port}"
-        print(f"\nOctagon / UFC Market Lab\n{url}\nSource: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
+        print(f"\nOctagon / UFC Market Lab\n{url}\nHome: historical Practice (real past bouts + synthetic prices)\nAdvanced market source: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
         if not args.no_browser:
             threading.Timer(1.5,lambda:webbrowser.open(url)).start()
         uvicorn.run(app,host="127.0.0.1",port=args.port,access_log=False)

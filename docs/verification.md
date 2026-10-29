@@ -43,3 +43,11 @@ At the October 21 baseline, the GitHub Actions workflow had not run remotely; Li
 - Existing remote PR CI passed on 6a90613; check current PR for latest commit's CI. Existing daily 05:15 continuation is unchanged.
 
 Clean-runner CI on a6a5813 exposed one test relying on the unversioned local data cache (175 passed, one failed). The test now creates a labeled synthetic CSV/manifest/artifact fixture and verifies hashes, inference provenance and missing-source failure without network access. It no longer assumes developer-machine data. No runtime validation or source pins were weakened.
+
+## Historical Practice user-flow milestone
+
+The previous UI did not provide the user's requested old-fight automatic practice flow; passing engineering tests did not prove that user goal. docs/PRODUCT_ISSUES.md records the observed failures and corrections. Practice is now the home screen, with searchable historical bouts, Start/Pause/Resume/Step/speed, fixed trained predictions, automatic order activity, a separate account and result reveal.
+
+Full local integration passed 197 Python and 4 frontend tests plus production build. After final search/isolated-worker/error-display changes, 22 targeted practice/API tests and the production build passed. Tests are fully offline with labeled source/model fixtures and validate source hashes, future-result exclusion, model input cutoffs, winner-independent synthetic quotes, YES/NO reduce-only exits, virtual arrival/depth/cost accounting, pause/step, deterministic repeat, archive/close, risk caps, authenticated controls and main-account isolation.
+
+Browser verification on cached real source completed Gerald Meerschaert vs Julius Walker (2026-10-10). The trained pre-fight probability stayed fixed; automatic NO buys and reduce-only sales visibly executed under the synthetic book. Pause worked. Only completed-round statistics appeared, and the recorded result was revealed at the 515-second active-time finish. No synthetic P&L is presented as historical exchange returns or profitable edge. The flow requires no live credentials or real-clock bypass. No fight video or trained in-fight prediction is supplied.

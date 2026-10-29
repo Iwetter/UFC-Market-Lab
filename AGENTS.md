@@ -10,3 +10,5 @@
 - Run targeted tests after small changes. Run `python scripts/check.py` at an integration milestone; `python scripts/scan_secrets.py` before publication. Do not repeat full suites without a new change/failure/concern. Use the existing installed interpreter; this checkout can reuse `../ufc-research/.venv/Scripts/python` locally.
 - Keep collection/paper execution deterministic ordinary services, independent of Codex/LLM calls. One database writer via writer_lease; WAL-safe verified atomic backups; no credentials in logs or Git. Raw events remain append-only.
 - Save reviewable Git changes without overwriting others. Update concise progress only on meaningful changes, including actual checks, limitations and next task. Do not create another conversation or duplicate automation.
+
+- Primary UX is historical Practice: one Start button, visible automatic decisions/orders, separated synthetic prices, fixed pre-fight probability and hidden future results. Preserve practice-account isolation; never present scenario P&L as historical exchange returns. Product gaps and acceptance criteria are in docs/PRODUCT_ISSUES.md.

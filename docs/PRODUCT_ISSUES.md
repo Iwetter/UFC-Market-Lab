@@ -4,10 +4,15 @@ The user wants to select an old UFC fight, press Play, and watch the bot predict
 buy, sell and explain itself. The existing product does not provide that flow.
 Passing software tests did not establish that this user task was achievable.
 
+## Implemented correction — October 29
+
+The new home screen now implements the historical Practice flow below. It has searchable real bouts, Start/Pause/Resume/Step/speed controls, fixed trained predictions, visible automatic entry/exit decisions, fills, holdings and fake-money P&L, plus an end-of-replay result reveal. The issues table records the previous user-blocking behavior and its required correction. True historical market books and a trained in-fight model remain unavailable. See [how to run Practice](PRACTICE.md).
+
 ## Observed failures
 
 | Problem | Effect on the user | Required correction |
 | --- | --- | --- |
+| Updates remain on the development branch/PR until merged. | Pulling main can show an older version and make completed work appear absent. | Name the branch and link the running version; README clone instructions select the current upgrade branch. |
 | The default screen shows a fictional fight or live quotes, with no historical practice entry point. | The user cannot find or observe the bot they requested. | Make **Practice** the entry screen, with a real historical bout picker and Start button. |
 | **Simulate buy** is a manual order button, although it sounds like running the bot. | The user clicks individual orders and expects autonomous decisions. | Label manual orders explicitly; put automatic strategy controls and status together. |
 | Model research, market viewing, mapping and automation are separate workflows. | Configuration looks like unfinished functionality; no clear next action is visible. | Provide a complete practice session without keys, mapping forms, external schedule input or real clock synchronization. |

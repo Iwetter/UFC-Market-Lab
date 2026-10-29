@@ -11,3 +11,5 @@ frontend/dist
 .env
 config/live*.json
 secrets
+
+**/.pytest_tmp

@@ -17,17 +17,19 @@ flowchart LR
     Journal --> Replay[Deterministic replay and research]
 ```
 
-## Run the demo
+## Watch historical Practice
 
-Requires Python 3.12+ and Node.js 20.19+ or 22.12+:
+Requires Python 3.12+ and Node.js 20.19+ or 22.12+. The Practice upgrade is currently on the development branch in PR #1; these commands select that branch until it is merged:
 
 ```powershell
-git clone https://github.com/Iwetter/UFC-Market-Lab.git
+git clone --branch research/data-latency-2026-10-29 https://github.com/Iwetter/UFC-Market-Lab.git
 cd UFC-Market-Lab
-python start.py
+python start.py --prepare-data
 ```
 
-The launcher installs dependencies, builds the frontend, and starts the local dashboard at `http://127.0.0.1:8000`. The default source is an explicitly fictional mock scenario and execution is simulated.
+The launcher installs dependencies, reuses or acquires the pinned historical cache, builds the frontend, and starts the dashboard at `http://127.0.0.1:8000`. **Practice is the home screen:** search a real past UFC bout, press **Start practice**, and watch automatic decisions, orders, positions and fake-money P&L on one page. The trained pre-fight probability stays fixed; market prices are explicitly synthetic because historical exchange books are absent. See [Practice instructions](docs/PRACTICE.md) and [documented product issues](docs/PRODUCT_ISSUES.md).
+
+Pause, Resume, Step and speed controls make the bot observable. Completed-round statistics and the actual result are revealed only as replay progresses. Each practice run has an isolated journal/account. Advanced **Manual orders** retains the fictional demo or real Kalshi quotes according to the source setting; **Live PAPER** is a separate workflow.
 
 ## New research and always-on capture
 
@@ -48,7 +50,7 @@ For a server with Docker, `docker compose up -d --build` starts the single-write
 
 ## Automatic experimental PAPER research
 
-Run `python start.py --source kalshi --prepare-data` for public Kalshi data and the fitted historical model. In **Automation**, review the exact bout, canonical fighters, card, settlement rules and earliest start; then enable the deterministic PAPER strategy. It opens/closes simulated YES/NO holdings through the existing latency/depth/fee/risk broker. No real order route is added. Fresh clock observations and every execution gate must pass.
+Run `python start.py --source kalshi --prepare-data` for public Kalshi data and the fitted historical model. In **Live PAPER**, review the exact bout, canonical fighters, card, settlement rules and earliest start; then enable the deterministic PAPER strategy. It opens/closes simulated YES/NO holdings through the existing latency/depth/fee/risk broker. No real order route is added. Fresh clock observations and every execution gate must pass.
 
 Set `POLYMARKET_US_ENABLED=true` before startup for public US quotes; its optional authenticated markets stream uses separate file-backed credentials. International read-only capture is explicitly opt-in. Polymarket execution remains unfinished.
 

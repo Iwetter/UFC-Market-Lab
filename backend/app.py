@@ -50,6 +50,8 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
     cfg = cfg or Settings.model_validate_json((ROOT/"config/default.json").read_text())
     engine = Engine(cfg,model_path,infight_model_path)
     token = secrets.token_urlsafe(32)
+    from .practice import PracticeController
+    practice=PracticeController(ROOT,Path(cfg.database).resolve().parent/'practice')
 
     @asynccontextmanager
     async def lifespan(app):
@@ -70,15 +72,25 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
                         callback=getattr(app.state,"on_runtime_failure",None)
                         if callback:callback()
             for task in tasks:task.add_done_callback(failed)
+        if background:
+            practice_task=asyncio.create_task(practice.run())
+            def practice_failed(done):
+                if not done.cancelled() and done.exception() is not None:
+                    # Practice failure never kills or changes the market-data account.
+                    practice.runtime_error=type(done.exception()).__name__
+            practice_task.add_done_callback(practice_failed)
+            tasks.append(practice_task)
         yield
         for task in tasks:task.cancel()
         await asyncio.gather(*tasks,return_exceptions=True)
+        practice.close()
         research.shutdown_research()
         engine.store.close()
 
     app = FastAPI(title="Octagon / UFC Market Lab",version="0.1.0",lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware,allowed_hosts=["localhost","127.0.0.1","testserver"])
     app.state.engine = engine
+    app.state.practice = practice
     app.state.on_runtime_failure = None
 
     @app.middleware("http")
@@ -129,6 +141,8 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
     app.include_router(research)
     from .automation_api import automation_router
     app.include_router(automation_router(engine,ROOT,operator))
+    from .practice_api import practice_router
+    app.include_router(practice_router(practice,operator))
 
     @app.get("/metrics")
     async def metrics():
