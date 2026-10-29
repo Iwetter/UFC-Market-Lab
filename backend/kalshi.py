@@ -196,7 +196,7 @@ class KalshiRecorder:
                         await self.resnapshot()
                 else:
                     book.snapshot(payload["yes_dollars"],payload["no_dollars"],ts)
-                self.engine.record_book(ticker,ts)
+                    self.engine.record_book(ticker,ts,{"source_protocol":"rest"})
         self.engine.health.update(rest="connected",last_rest_ms=now_ms(),error=None)
 
     async def polling(self):
@@ -247,7 +247,8 @@ class KalshiRecorder:
                             raise ValueError("WebSocket subscription rejected")
                         ticker = msg.get("msg",{}).get("market_ticker")
                         if ticker and ticker in self.engine.markets:
-                            if msg["type"] in {"orderbook_snapshot","orderbook_delta"}: self.engine.record_book(ticker,ts)
+                            if msg["type"] in {"orderbook_snapshot","orderbook_delta"}:
+                                self.engine.record_book(ticker,ts,{"source_protocol":"websocket","exchange_ts_ms":msg["msg"].get("ts_ms"),"sending_ts_ms":msg.get("sending_ts_ms")})
                             if msg["type"] == "market_lifecycle_v2": self.engine.lifecycle(msg["msg"],ts)
                         if msg["type"] == "event_fee_update":
                             # Immediately fail closed until REST metadata is refreshed.

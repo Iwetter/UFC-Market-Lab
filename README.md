@@ -29,6 +29,23 @@ python start.py
 
 The launcher installs dependencies, builds the frontend, and starts the local dashboard at `http://127.0.0.1:8000`. The default source is an explicitly fictional mock scenario and execution is simulated.
 
+## New research and always-on capture
+
+```powershell
+.venv/Scripts/python scripts/acquire_mma_data.py --train --artifact-output artifacts/research
+.venv/Scripts/python -m backend.recorder --source kalshi --database data/kalshi.sqlite3
+```
+
+Open the **Research** tab to inspect actual sample counts, chronological holdout scores, market-reaction hypotheses and the absence of eligible exact-position samples. The live execution models are unchanged until separately validated and explicitly approved. The first command downloads real CC BY 4.0 data at a pinned commit; it never invents exchange prices or publication timestamps.
+
+- [Historical samples, source review and reproduction](docs/data_sources.md) · [actual evaluation report](docs/data-training-report.json)
+- [Physical/broadcast timing protocol and 12-second hypothesis](docs/latency-study.md)
+- [Mount/back/guard position evidence and its limits](docs/position-data-research.md)
+- [Live feed options and optional licensed adapter](docs/live-data-options.md)
+- [Always-on Docker/VPS deployment, private access and backups](docs/always-on.md)
+
+For a server with Docker, `docker compose up -d --build` starts the single-writer PAPER recorder and private dashboard. Docker was not available in development; container build and cloud provisioning remain unverified. No server or feed subscription was purchased.
+
 ## Technical highlights
 
 - Append-only SQLite WAL journal, hash chaining, and source timestamps.
@@ -40,7 +57,7 @@ The launcher installs dependencies, builds the frontend, and starts the local da
 
 ## Status and limitations
 
-This is a research and paper-execution application. It does not bundle a fitted UFC prediction model, historical licensed dataset, or demonstrated profitable strategy. Default probabilities are labeled synthetic; real-data operation requires the documented inputs. The separate live gateway is disabled by default and has no dashboard order route.
+This is a research and paper-execution application. It now includes fitted historical research baselines, reproducible acquisition of 6,743 bouts and 29,937 judge-round rows, and a real evaluation report. These artifacts are separate from trading-approved models. Default demo probabilities remain labeled synthetic; no profitable strategy or measured 12-second delay is claimed. The separate live gateway is disabled by default and has no dashboard order route.
 
 Runtime databases, credentials, original prompt/reference archives, and generated frontend assets are excluded from the repository. Review the [technical guide](TECHNICAL_GUIDE.md) and [`docs/implementation.md`](docs/implementation.md) for exact scope and operating assumptions.
 

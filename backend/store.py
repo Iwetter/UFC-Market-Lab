@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS events(
  source_ts_ms INTEGER, sending_ts_ms INTEGER, recv_utc_ns INTEGER NOT NULL,
  recv_mono_ns INTEGER NOT NULL, host_session TEXT NOT NULL, seq INTEGER, sid INTEGER,
  payload TEXT NOT NULL, raw_b64 TEXT NOT NULL, previous_hash TEXT NOT NULL, hash TEXT UNIQUE NOT NULL);
+CREATE INDEX IF NOT EXISTS events_session_time ON events(host_session,recv_utc_ns);
 CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'append-only'); END;
 CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT,'append-only'); END;
 CREATE TABLE IF NOT EXISTS state(key TEXT PRIMARY KEY, value TEXT NOT NULL);

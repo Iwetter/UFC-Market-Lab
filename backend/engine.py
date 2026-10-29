@@ -77,6 +77,7 @@ class Engine:
         statuses = {"deactivated":"inactive","activated":"active","determined":"determined","settled":"finalized"}
         if kind in statuses:
             market.status = statuses[kind]
+            if market.status != "active":self.books.books.setdefault(ticker,Book()).stale=True
         if kind in {"price_level_structure_updated","metadata_updated","close_date_updated"}:
             self.books.books.setdefault(ticker,Book()).stale = True
             market.price_ranges = []  # REST re-verification required.
@@ -139,9 +140,12 @@ class Engine:
         self.store.prediction(ts,ticker,{"p_yes":p,"market_mid":benchmark,"model":self.prefight.status["version"],
             "updater":self.infight.model.status["version"],"mock":self.cfg.source=="mock","fight_seq":fight.last_seq if fight else None})
 
-    def record_book(self, ticker, ts):
+    def record_book(self, ticker, ts, metadata=None):
         book = self.books.books[ticker]
-        self.store.append(self.cfg.source,"book",{"ticker":ticker,**book.view()},recv_utc_ns=ts*1_000_000)
+        timing = {"source_protocol":"unknown","exchange_ts_ms":None,"sending_ts_ms":None,
+                  "market_status":self.markets[ticker].status}
+        if metadata: timing.update(metadata)
+        self.store.append(self.cfg.source,"book",{"ticker":ticker,**book.view(),**timing},recv_utc_ns=ts*1_000_000)
         self.record_prediction(ticker,ts)
 
     def context(self, ticker, ts=None):
@@ -265,8 +269,11 @@ class Engine:
     async def run(self):
         if self.cfg.source == "kalshi":
             from .kalshi import KalshiRecorder
+            from .licensed_runtime import configured_recorders
+            licensed=configured_recorders(self)
             self.recorder = KalshiRecorder(self)
             self.tasks = [asyncio.create_task(self.recorder.polling()),asyncio.create_task(self.recorder.streaming())]
+            self.tasks.extend(asyncio.create_task(feed.run()) for feed in licensed)
         try:
             last_mock,last_history = 0,0
             while True:

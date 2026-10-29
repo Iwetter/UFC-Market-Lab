@@ -45,30 +45,40 @@ class PreFightRequest(StrictModel):
     available_ms: int
 
 
-def create_app(cfg=None, *, background=True, model_path=None, infight_model_path=None):
+def create_app(cfg=None, *, background=True, model_path=None, infight_model_path=None, operations=False):
     cfg = cfg or Settings.model_validate_json((ROOT/"config/default.json").read_text())
     engine = Engine(cfg,model_path,infight_model_path)
     token = secrets.token_urlsafe(32)
 
     @asynccontextmanager
     async def lifespan(app):
-        task = asyncio.create_task(engine.run()) if background else None
-        if task:
+        tasks = [asyncio.create_task(engine.run())] if background else []
+        if operations and background:
+            from .operations import monitor_operations
+            tasks.append(asyncio.create_task(monitor_operations(engine)))
+        if tasks:
             def failed(done):
                 if not done.cancelled() and done.exception() is not None:
                     engine.health["engine_fault"] = type(done.exception()).__name__
                     engine.books.invalidate()
-                    engine.broker.kill(now_ms())
-            task.add_done_callback(failed)
+                    try:engine.broker.kill(now_ms())
+                    except Exception:engine.broker.killed=True
+                    finally:
+                        for other in tasks:
+                            if other is not done:other.cancel()
+                        callback=getattr(app.state,"on_runtime_failure",None)
+                        if callback:callback()
+            for task in tasks:task.add_done_callback(failed)
         yield
-        if task:
-            task.cancel()
-            await asyncio.gather(task,return_exceptions=True)
+        for task in tasks:task.cancel()
+        await asyncio.gather(*tasks,return_exceptions=True)
+        research.shutdown_research()
         engine.store.close()
 
     app = FastAPI(title="Octagon / UFC Market Lab",version="0.1.0",lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware,allowed_hosts=["localhost","127.0.0.1","testserver"])
     app.state.engine = engine
+    app.state.on_runtime_failure = None
 
     @app.middleware("http")
     async def security_headers(request,call_next):
@@ -112,6 +122,10 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
     async def audit():
         rows = engine.store.db.execute("SELECT id,source,channel,source_ts_ms,recv_utc_ns,seq,sid,hash FROM events ORDER BY id DESC LIMIT 100").fetchall()
         return {"chain_valid":engine.store.verify(),"events":[dict(r) for r in rows]}
+
+    from .research_api import research_router
+    research=research_router(engine,ROOT,operator)
+    app.include_router(research)
 
     @app.get("/metrics")
     async def metrics():

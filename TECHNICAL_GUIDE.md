@@ -1,3 +1,5 @@
+> **October 29 extension:** The original platform guide below describes the initial implementation. Real historical research samples and fitted research-only artifacts are now available; see [data sources](docs/data_sources.md), [evaluation](docs/data-training-report.json), [timing study](docs/latency-study.md), [position evidence](docs/position-data-research.md), and [always-on deployment](docs/always-on.md). New research outputs do not approve the execution models or establish a profitable edge. The original statement that no historical dataset had been supplied refers to the initial build.
+
 # Octagon · UFC Market Lab
 
 A local Python/FastAPI + React platform for UFC probability research, official Kalshi market-data capture, deterministic replay and **PAPER trading**. Persistent accounting and event capture run end to end. No fitted UFC model, historical dataset, profitable strategy or model-performance result is bundled.

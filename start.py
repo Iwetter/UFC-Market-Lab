@@ -56,15 +56,19 @@ def main():
         return
     from backend.app import create_app
     from backend.domain import Settings
+    from backend.operations import writer_lease
     import uvicorn
     cfg=Settings.model_validate_json((ROOT/"config/default.json").read_text())
     cfg=cfg.model_copy(update={"source":args.source,"database":args.database or f"data/{args.source}.sqlite3"})
-    app=create_app(cfg,model_path=args.model,infight_model_path=args.infight_model)
-    url=f"http://127.0.0.1:{args.port}"
-    print(f"\nOctagon / UFC Market Lab\n{url}\nSource: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
-    if not args.no_browser:
-        threading.Timer(1.5,lambda:webbrowser.open(url)).start()
-    uvicorn.run(app,host="127.0.0.1",port=args.port,access_log=False)
+    # Acquire before create_app constructs/writes Engine and retain the lease
+    # for the whole server lifetime, matching the headless/container entrypoints.
+    with writer_lease(cfg.database):
+        app=create_app(cfg,model_path=args.model,infight_model_path=args.infight_model)
+        url=f"http://127.0.0.1:{args.port}"
+        print(f"\nOctagon / UFC Market Lab\n{url}\nSource: {args.source.upper()} | Execution: PAPER | Live adapter: disabled\nDatabase: {cfg.database}\nCtrl+C stops the engine.\n",flush=True)
+        if not args.no_browser:
+            threading.Timer(1.5,lambda:webbrowser.open(url)).start()
+        uvicorn.run(app,host="127.0.0.1",port=args.port,access_log=False)
 
 
 if __name__ == "__main__":

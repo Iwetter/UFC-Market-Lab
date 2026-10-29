@@ -1,0 +1,13 @@
+.git
+.venv
+**/__pycache__
+**/.pytest_cache
+work
+data
+frontend/node_modules
+frontend/dist
+*.pem
+*.key
+.env
+config/live*.json
+secrets

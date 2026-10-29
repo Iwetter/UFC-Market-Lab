@@ -26,4 +26,5 @@ node_modules/
 *.sqlite3*
 *.kicad_prl
 ~*.lck
+secrets/
 work/

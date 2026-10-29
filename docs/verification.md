@@ -20,6 +20,16 @@ The first browser test exposed a missing WebSocket serialization import. It was 
 
 The test suite may emit a Starlette warning that its httpx test client integration is deprecated in favor of httpx2. Runtime HTTP/WS behavior and test assertions pass; this is a dependency migration notice, not a suppressed failure.
 
-Not verified with real credentials/data: authenticated Kalshi WS, Sportradar or other vendor-specific integration, demo/prod order submission, measured real feed latency, sustained uptime, trained UFC calibration or profitable edge. Live-gateway tests use an in-memory HTTP transport pointed at the official demo URL contract, with no network dispatch.
+At the October 21 baseline, not verified with real credentials/data: authenticated Kalshi WS, Sportradar or other vendor-specific integration, demo/prod order submission, measured real feed latency, sustained uptime, trained UFC calibration or profitable edge. The October 29 extension below adds explicitly limited historical model evaluation. Live-gateway tests use an in-memory HTTP transport pointed at the official demo URL contract, with no network dispatch.
 
-The GitHub Actions workflow is provided but has not run remotely; Linux/Python 3.12 compatibility is configured in CI, not claimed from local Windows testing. No external GitHub repository was modified.
+At the October 21 baseline, the GitHub Actions workflow had not run remotely; Linux/Python 3.12 compatibility was configured in CI, not claimed from local Windows testing. That baseline was delivered as a local export. Check the pull request for current remote CI results.
+
+
+## October 29 extension
+
+- Acquired and trained on the real pinned CC BY 4.0 dataset; exact corrected counts, embargo, train/cal/test partitions, fitted model hashes and actual holdout metrics are in `data-training-report.json`. No unchanged model was retrained for subsequent validation passes.
+- Final local integration: **110 Python tests**, **2 frontend tests**, TypeScript/Vite production build and source secret scan passed. Added coverage includes source integrity, nonbinary history, deduplication, test-label perturbation/frozen artifacts, lifecycle/timing/window/session guards, backups, single-writer launcher leases, licensed adapter fault handling, development-run leases, and no promotion from historical inference to execution.
+- Bounded headless real REST capture: 26 markets, 104 book observations across four polls, 12 seconds, healthy collector, no event feed and no orders. `latency-capture-report.json` reports insufficient physical and broadcast timing evidence, not a measured 12-second delay.
+- Browser verified the Research tab's actual historical scores, zero real physical timing/position samples, and mock-tag exclusion.
+- Docker/Compose YAML is prepared and parsed; Docker binary, cloud access, Kalshi read key and licensed vendor entitlement were unavailable. Container execution, authenticated live feeds and deployment are not claimed.
+- One daily 05:15 America/New_York continuation heartbeat is active on this chat. Native schedule ID is recorded in PROGRESS; its target is the existing conversation. The host must remain on with the app running for local file access. No credits, reset credits, subscriptions or hosting were purchased/activated.
