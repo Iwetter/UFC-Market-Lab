@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt && groupadd --gid 10001 resea
 COPY backend/ ./backend/
 COPY config/default.json ./config/default.json
 COPY docs/ ./docs/
-COPY artifacts/research/ ./artifacts/research/
+COPY artifacts/ ./artifacts/
 COPY --from=dashboard /frontend/dist ./frontend/dist/
 RUN mkdir -p /app/data && chown -R research:research /app/data
 USER 10001:10001

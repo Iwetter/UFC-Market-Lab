@@ -37,6 +37,7 @@ class ClockObservation(StrictModel):
     offset_ms: float = Field(allow_inf_nan=False)
     measured_ms: int
     source: str = Field(min_length=1,max_length=100)
+    uncertainty_ms: float = Field(default=0,ge=0,allow_inf_nan=False)
 
 
 class PreFightRequest(StrictModel):
@@ -126,6 +127,8 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
     from .research_api import research_router
     research=research_router(engine,ROOT,operator)
     app.include_router(research)
+    from .automation_api import automation_router
+    app.include_router(automation_router(engine,ROOT,operator))
 
     @app.get("/metrics")
     async def metrics():
@@ -160,6 +163,7 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
         if abs(now_ms()-observation.measured_ms)>60000: raise ValueError("clock observation too old")
         engine.clock_offset_ms = observation.offset_ms
         engine.clock_observed_ms = observation.measured_ms
+        engine.clock_uncertainty_ms = observation.uncertainty_ms
         engine.store.append("clock_monitor","clock_offset",observation)
         return {"accepted":True}
 

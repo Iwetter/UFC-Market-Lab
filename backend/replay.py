@@ -50,7 +50,13 @@ def run_replay(input_path, output_path, cfg:Settings, latency_ms=None, session=N
             engine.fees[payload["ticker"]] = FeeSchedule(payload["fee_type"],D(payload["multiplier"]),payload["verified_ms"],payload.get("valid_until_ms"))
         elif channel == "clock_offset":
             engine.clock_offset_ms=payload["offset_ms"]; engine.clock_observed_ms=payload["measured_ms"]
+            engine.clock_uncertainty_ms=payload.get('uncertainty_ms',0)
         elif channel == "model_approval": engine.store.put("model_approval",payload)
+        elif channel == 'autopaper_settings':
+            from .autopaper import AutoPaperSettings
+            engine.autopaper.settings=AutoPaperSettings.model_validate(payload)
+        elif channel == 'autopaper_fixture': engine.autopaper.fixtures[payload['ticker']]=payload
+        elif channel == 'autopaper_prediction': engine.autopaper.predictions[payload['ticker']]={k:v for k,v in payload.items() if k!='ticker'}
         elif channel == "exchange_status": engine.exchange_active=payload["active"]
         elif channel == "order_intent":
             engine.submit(OrderIntent.model_validate(payload["intent"]),ts)

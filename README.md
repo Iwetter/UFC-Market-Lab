@@ -46,6 +46,18 @@ Open the **Research** tab to inspect actual sample counts, chronological holdout
 
 For a server with Docker, `docker compose up -d --build` starts the single-writer PAPER recorder and private dashboard. Docker was not available in development; container build and cloud provisioning remain unverified. No server or feed subscription was purchased.
 
+## Automatic experimental PAPER research
+
+Run `python start.py --source kalshi --prepare-data` for public Kalshi data and the fitted historical model. In **Automation**, review the exact bout, canonical fighters, card, settlement rules and earliest start; then enable the deterministic PAPER strategy. It opens/closes simulated YES/NO holdings through the existing latency/depth/fee/risk broker. No real order route is added. Fresh clock observations and every execution gate must pass.
+
+Set `POLYMARKET_US_ENABLED=true` before startup for public US quotes; its optional authenticated markets stream uses separate file-backed credentials. International read-only capture is explicitly opt-in. Polymarket execution remains unfinished.
+
+- [Automatic paper setup and operating limits](docs/autopaper.md)
+- [Reproducible Elo/logistic/boosted-tree comparison](docs/ml-pipeline.md) · [actual comparison scores](docs/model-comparison.json)
+- [Polymarket official interfaces, configuration and verified capture](docs/polymarket.md)
+
+The selected logistic model scored log loss **0.6573** on 992 reused holdout bouts; the frozen earlier baseline remains slightly better at **0.6560**. Selection uses validation only, followed by a separate calibration window. This reused holdout is not new untouched evidence, and no profitable trading result is claimed.
+
 ## Technical highlights
 
 - Append-only SQLite WAL journal, hash chaining, and source timestamps.

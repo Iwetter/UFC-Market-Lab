@@ -77,6 +77,7 @@ class Market(BaseModel):
     ticker: str
     event_ticker: str
     title: str = ""
+    event_title: str = ""  # Official parent event title, enriched by discovery.
     yes_sub_title: str = ""
     status: str
     close_time: str | None = None

@@ -47,12 +47,16 @@ class Store:
 
     @contextmanager
     def transaction(self):
-        self.db.execute("BEGIN IMMEDIATE")
+        nested = self.db.in_transaction
+        self.db.execute("SAVEPOINT nested_operation" if nested else "BEGIN IMMEDIATE")
         try:
             yield
-            self.db.execute("COMMIT")
+            self.db.execute("RELEASE SAVEPOINT nested_operation" if nested else "COMMIT")
         except BaseException:
-            self.db.execute("ROLLBACK")
+            if nested:
+                self.db.execute("ROLLBACK TO SAVEPOINT nested_operation")
+                self.db.execute("RELEASE SAVEPOINT nested_operation")
+            else:self.db.execute("ROLLBACK")
             raise
 
     def append(self, source, channel, payload, *, raw: bytes | None = None,

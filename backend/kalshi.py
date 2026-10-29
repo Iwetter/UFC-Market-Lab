@@ -158,8 +158,9 @@ class KalshiRecorder:
             discovered = await self.rest.discover()
             old_tickers = set(self.engine.markets)
             for market in discovered:
-                self.engine.add_market(market)
                 event = self.events.get(market.event_ticker,{})
+                market=market.model_copy(update={'event_title':event.get('title','')})
+                self.engine.add_market(market)
                 if event.get("fee_type_override") is not None or event.get("fee_multiplier_override") is not None:
                     self.engine.fees[market.ticker] = FeeSchedule(event.get("fee_type_override") or series["fee_type"],D(str(event.get("fee_multiplier_override") if event.get("fee_multiplier_override") is not None else series["fee_multiplier"])),ts,self.engine.series_fee.valid_until_ms)
                 else: self.engine.fees[market.ticker] = self.engine.series_fee

@@ -28,3 +28,4 @@ node_modules/
 ~*.lck
 secrets/
 work/
+artifacts/ml/.pytest_tmp/

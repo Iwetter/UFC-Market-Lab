@@ -39,6 +39,7 @@ class Engine:
         self.exchange_active = cfg.source == "mock"
         self.clock_offset_ms = 0 if cfg.source == "mock" else None
         self.clock_observed_ms = now_ms() if cfg.source == "mock" else 0
+        self.clock_uncertainty_ms = 0
         self.history = self.store.get("history",[])[-180:]
         self.mock_index = self.store.get("mock_index",0)
         self.mock_running = True
@@ -46,6 +47,9 @@ class Engine:
         self.started_ms = now_ms()
         self.tasks = []
         self.recorder = None
+        self.venue_recorder = None
+        from .autopaper import AutoPaper
+        self.autopaper = AutoPaper(self)
         self.mock_cycle = self.store.get("mock_cycle",1)
         if cfg.source == "mock" and not self.markets and cfg.mode != "replay":
             self.new_mock(now_ms())
@@ -53,7 +57,7 @@ class Engine:
     def add_market(self, market):
         old = self.markets.get(market.ticker)
         self.markets[market.ticker] = market
-        if old and (old.yes_sub_title != market.yes_sub_title or old.rules_primary != market.rules_primary):
+        if old and any(getattr(old,k)!=getattr(market,k) for k in ('title','event_title','yes_sub_title','rules_primary','rules_secondary')):
             mapping = self.mappings.get(market.ticker)
             if mapping:
                 mapping.update(confirmed=False,replacement=True)
@@ -63,6 +67,8 @@ class Engine:
 
     def apply_market(self, payload, ts):
         market = Market.model_validate(payload)
+        if not market.event_title and market.ticker in self.markets:
+            market.event_title=self.markets[market.ticker].event_title
         self.add_market(market)
         if market.status != "active" and market.ticker in self.books.books:
             self.books.books[market.ticker].stale = True
@@ -123,19 +129,21 @@ class Engine:
     def persist_fights(self):
         self.store.put("fights",{bid:{k:v for k,v in vars(state).items() if k != "seen"} for bid,state in self.fights.items()})
 
-    def probabilities(self, ticker):
+    def probabilities(self, ticker, ts=None):
         mapping = self.mappings.get(ticker)
         fight = self.fights.get(mapping["bout_id"]) if mapping else None
         book = self.books.books.get(ticker)
         bid,ask = book.quote() if book else (None,None)
         benchmark = float((bid+ask)/2) if bid is not None and ask is not None else None
+        historical = self.autopaper.probability(ticker,now_ms() if ts is None else ts)
+        if historical is not None:return historical,benchmark,fight
         if fight and mapping and mapping["confirmed"]:
             p = self.infight.probability(fight) if fight.status != "scheduled" else fight.prior
             return (p if mapping["yes_is_a"] else 1-p),benchmark,fight
         return benchmark,benchmark,fight
 
     def record_prediction(self, ticker, ts):
-        p,benchmark,fight = self.probabilities(ticker)
+        p,benchmark,fight = self.probabilities(ticker,ts)
         if p is None: return
         self.store.prediction(ts,ticker,{"p_yes":p,"market_mid":benchmark,"model":self.prefight.status["version"],
             "updater":self.infight.model.status["version"],"mock":self.cfg.source=="mock","fight_seq":fight.last_seq if fight else None})
@@ -157,14 +165,16 @@ class Engine:
         model_ready = self.cfg.source == "mock" or bool(self.prefight.artifact and approval and approval["version"] == self.prefight.status["version"])
         if fight and fight.status not in {"scheduled","finished"} and not self.infight.model.artifact and self.cfg.source != "mock": model_ready = False
         clock = self.clock_offset_ms if 0 <= ts-self.clock_observed_ms <= 60000 or self.cfg.source == "mock" else None
-        return dict(market=market,book=self.books.books.setdefault(ticker,Book()),mapping=mapping,fight=fight,
+        if clock is not None and abs(clock)+self.clock_uncertainty_ms>50:clock=None
+        context = dict(market=market,book=self.books.books.setdefault(ticker,Book()),mapping=mapping,fight=fight,
                     clock_offset_ms=clock,exchange_active=self.exchange_active,model_ready=model_ready,fees=self.fees.get(ticker))
+        return self.autopaper.context(ticker,ts,context)
 
     def submit(self, intent, ts):
         if intent.ticker not in self.markets: raise ValueError("unknown market")
         if self.store.db.execute("SELECT 1 FROM orders WHERE id=?",(str(intent.id),)).fetchone():
             return self.broker.submit(intent,ts,self.context(intent.ticker,ts))
-        p,benchmark,fight = self.probabilities(intent.ticker)
+        p,benchmark,fight = self.probabilities(intent.ticker,ts)
         if p is not None and ((benchmark is not None and abs(p-benchmark) > .35) or
                 (fight and fight.status == "live" and not .01 <= p <= .99)):
             self.broker.kill(ts)
@@ -191,6 +201,7 @@ class Engine:
         self.store.put("day_baseline",baseline)
         if pnl-D(baseline["pnl"]) <= -self.cfg.max_daily_loss or peak-pnl >= self.cfg.daily_drawdown:
             if not self.broker.killed: self.broker.kill(ts)
+        self.autopaper.run_once(ts)
 
     def new_mock(self, ts):
         if self.cfg.source != "mock": raise ValueError("mock source disabled")
@@ -237,7 +248,7 @@ class Engine:
         ts = now_ms() if ts is None else ts
         rows = []
         for ticker,market in self.markets.items():
-            p,benchmark,fight = self.probabilities(ticker)
+            p,benchmark,fight = self.probabilities(ticker,ts)
             book = self.books.books.setdefault(ticker,Book())
             c = self.context(ticker,ts)
             fee = c["fees"]
@@ -263,6 +274,8 @@ class Engine:
                 "markets":rows,"portfolio":self.broker.summary(self.books.books),"orders":self.broker.orders()[-100:],
                 "fills":self.store.bodies("fills")[-100:],"health":self.health|{"sequence_gaps":self.books.gaps,"clock_offset_ms":self.clock_offset_ms,"clock_verified_ms":self.clock_observed_ms},
                 "model":self.prefight.status,"infight_model":self.infight.model.status,"history":self.history[-180:],
+                "automation":self.autopaper.snapshot(),
+                "venues":self.venue_recorder.snapshot()['venues'] if self.venue_recorder else {},
                 "mock_running":self.mock_running,"mock_complete":self.mock_index>33,
                 "events_recorded":self.store.db.execute("SELECT count(*) FROM events").fetchone()[0]}
 
@@ -271,9 +284,14 @@ class Engine:
             from .kalshi import KalshiRecorder
             from .licensed_runtime import configured_recorders
             licensed=configured_recorders(self)
+            from .polymarket import PolymarketRecorder
+            from .clock_monitor import monitor_clock
+            self.venue_recorder=PolymarketRecorder(self)
             self.recorder = KalshiRecorder(self)
             self.tasks = [asyncio.create_task(self.recorder.polling()),asyncio.create_task(self.recorder.streaming())]
             self.tasks.extend(asyncio.create_task(feed.run()) for feed in licensed)
+            self.tasks.append(asyncio.create_task(self.venue_recorder.run()))
+            self.tasks.append(asyncio.create_task(monitor_clock(self)))
         try:
             last_mock,last_history = 0,0
             while True:

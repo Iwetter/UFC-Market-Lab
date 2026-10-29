@@ -100,7 +100,7 @@ def research_router(engine,root:Path,operator):
             raise ValueError("annotation must match the reviewed bout/card mapping")
         for stamp in (event.provider_generated_ms,event.broadcast_observed_ms,event.physical_end_ms):
             if stamp is not None and stamp>ts+event.clock_uncertainty_ms:raise ValueError("future event annotations are rejected")
-        if event.physical_clock_verified and (engine.clock_offset_ms is None or abs(engine.clock_offset_ms)>50 or ts-engine.clock_observed_ms>60000):
+        if event.physical_clock_verified and (engine.clock_offset_ms is None or abs(engine.clock_offset_ms)+engine.clock_uncertainty_ms>50 or ts-engine.clock_observed_ms>60000):
             raise ValueError("physical timing requires a fresh measured clock observation")
         # Caller cannot relabel demo inputs as real samples or assert mapping approval.
         normalized=event.model_copy(update={"received_ms":ts,"mapping_confirmed":bool(mapping["confirmed"]),"is_mock":engine.cfg.source=="mock"})

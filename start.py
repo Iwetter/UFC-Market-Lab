@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--infight-model",help="Separate calibrated checkpoint JSON artifact")
     parser.add_argument("--no-browser",action="store_true")
     parser.add_argument("--no-install",action="store_true",help="Use current Python and existing frontend build")
+    parser.add_argument("--prepare-data",action="store_true",help="Acquire/verify pinned historical data for experimental predictions; no model retraining")
     parser.add_argument("--prepared",action="store_true",help=argparse.SUPPRESS)
     args=parser.parse_args()
     os.chdir(ROOT)
@@ -55,6 +56,9 @@ def main():
         run([python,ROOT/"start.py",*sys.argv[1:],"--prepared"])
         return
     from backend.app import create_app
+    if args.prepare_data:
+        from backend.historical import acquire_source
+        acquire_source(ROOT/'data/research/nlbair')
     from backend.domain import Settings
     from backend.operations import writer_lease
     import uvicorn

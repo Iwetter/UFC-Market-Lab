@@ -33,3 +33,11 @@ At the October 21 baseline, the GitHub Actions workflow had not run remotely; Li
 - Browser verified the Research tab's actual historical scores, zero real physical timing/position samples, and mock-tag exclusion.
 - Docker/Compose YAML is prepared and parsed; Docker binary, cloud access, Kalshi read key and licensed vendor entitlement were unavailable. Container execution, authenticated live feeds and deployment are not claimed.
 - One daily 05:15 America/New_York continuation heartbeat is active on this chat. Native schedule ID is recorded in PROGRESS; its target is the existing conversation. The host must remain on with the app running for local file access. No credits, reset credits, subscriptions or hosting were purchased/activated.
+
+## October 29 priority upgrade
+
+- Full final integration: **176 Python tests and 2 frontend tests passed**, with production TypeScript/Vite build and source private-key scan. Model artifact/sklearn parity, lagged identities, timestamp bounds, replay, YES/NO reduce-only automatic exits, atomic saves, throttle handling and SNTP validation are covered. Source scan checks private-key files/PEM blocks, not every possible secret format.
+- Actual bounded public Polymarket US recorder: 2 books, 6 events, verified hash chain, International disabled. Integrated browser showed real Kalshi and US quotes, actual model scores and parent-event identity candidates. Sustained public US requests encountered 429; quotes were explicitly stale. Pacing/Retry-After/backoff was added and fault-tested; sustained post-fix recovery is not claimed.
+- Public SNTP did return a measured host offset of about -0.72 seconds with low sample delay. The offset-plus-uncertainty execution gate blocked correctly; no system time was modified and no zero offset fabricated.
+- Frozen/reused holdout metrics and split limitations are documented in model-comparison.json and ml-pipeline.md. No genuine-market strategy fill, return, authenticated stream, International network integration, credentialed live-feed packet, Docker/cloud execution or in-fight predictive calibration is claimed.
+- Existing remote PR CI passed on 6a90613; check current PR for latest commit's CI. Existing daily 05:15 continuation is unchanged.
