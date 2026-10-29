@@ -1,6 +1,6 @@
 # Progress — October 29, 2026
 
-Repo Iwetter/UFC-Market-Lab; current checkout is this directory. Current local/default branch: main. Profit-taking/re-entry correction 41bb3e8 is published on main; all four Windows/Linux and Python3.12/3.13 CI jobs passed (run40841589239) before publication. PR https://github.com/Iwetter/UFC-Market-Lab/pull/1 is merged (merge commit 25870de); the Practice app and all accumulated research/recording code are published on main. Future implementation should start on a new scoped branch from current main. Existing same-chat daily 05:15 America/New_York continuation remains active; no duplicate schedule. Read AGENTS.md and ROADMAP.md; acquire the development lease before edits.
+Repo Iwetter/UFC-Market-Lab; current checkout is this directory. Default branch: main; current heartbeat fix branch: fix/paper-band-gap-execution. Profit-taking/re-entry correction 41bb3e8 is published on main; all four Windows/Linux and Python3.12/3.13 CI jobs passed (run40841589239) before publication. PR https://github.com/Iwetter/UFC-Market-Lab/pull/1 is merged (merge commit 25870de); the Practice app and all accumulated research/recording code are published on main. Future implementation should start on a new scoped branch from current main. Existing same-chat daily 05:15 America/New_York continuation remains active; no duplicate schedule. Read AGENTS.md and ROADMAP.md; acquire the development lease before edits.
 
 ## User-visible priority: watch the bot practice
 
@@ -37,3 +37,10 @@ Next: prioritize user feedback on this Practice flow and any demonstrated reliab
 - Exact policy/limits/fixture: docs/PROFIT_STRATEGY.md. Reliable live in-fight information plus a separately validated model are still missing, so Live PAPER continues to stop before the earliest start; Practice is explicitly a fixed-prediction synthetic-market experiment. Real funds remain disabled. Polymarket execution remains unfinished.
 
 Immediate next task: gather prospective evidence for the published strategy; continue prospective feed/model validation without selecting on known outcomes. No claim of live in-fight intelligence or profitability. Current strategy verification server is 127.0.0.1:8005; older8004 preview may still serve an older process until restarted.
+
+## October 29 scheduled reliability batch — price-band gaps
+
+- Reproduced an execution mismatch: the profit policy selected a valid conservative limit across a price-band gap, but PaperBroker skipped that band's boundary and canceled otherwise executable simulated orders. All four YES/NO buy/sell regression cases failed before the fix.
+- Centralized conservative YES-leg rounding in Market.execution_price, shared by strategy limits and broker arrival fills. Gap boundaries and asymmetric outcome complements now agree. Tight valid limits still cancel; no off-grid/out-of-limit fills or real-money path were added.
+- Verified 42 focused execution/policy/integration tests, then the full milestone: 227 Python tests, 7 frontend tests and TypeScript/Vite build passed. New synthetic tests cover all four action/outcome combinations and a tighter-limit cancellation; they are correctness fixtures, not market observations or profit results. Private-key scan/diff checks passed before push. No retraining/downloads/research repeated. Usage-limit tool was unavailable after one tool discovery; no credit/reset action taken.
+- Work saved on fix/paper-band-gap-execution from current main; not merged. Main remains the previously published user-approved strategy. Immediate next task: review this branch's remote CI before merging, then resume prospective recording/model validation. Release the development lease before stopping.

@@ -168,15 +168,8 @@ class PaperBroker:
                 break
             # Slippage consumes the budget; never fill beyond the limit or the grid.
             target = price+self.cfg.slippage if buy else price-self.cfg.slippage
-            choices = []
-            for band in market.price_ranges:
-                yes_target = target if intent.outcome == "yes" else ONE-target
-                rounded = band.start+((yes_target-band.start)/band.step).to_integral_value(rounding=ROUND_CEILING if buy == (intent.outcome == "yes") else ROUND_FLOOR)*band.step
-                effective = rounded if intent.outcome == "yes" else ONE-rounded
-                if band.start <= rounded <= band.end and ZERO < effective < ONE and (effective >= target if buy else effective <= target):
-                    choices.append(effective)
-            if not choices: continue
-            effective = min(choices) if buy else max(choices)
+            effective = market.execution_price(target,intent.outcome,buy)
+            if effective is None: continue
             if buy and effective > intent.limit_price or not buy and effective < intent.limit_price:
                 continue
             liquidity_key = (intent.ticker,book.updated_ms,intent.outcome,intent.action,str(price))
