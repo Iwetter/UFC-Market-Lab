@@ -1,6 +1,6 @@
 # Progress — October 29, 2026
 
-Repo: Iwetter/UFC-Market-Lab; checkout is this directory. Base main: 3166554. Working branch: research/data-latency-2026-10-29. Current extension is not merged.
+Repo: Iwetter/UFC-Market-Lab; checkout is this directory. Base main: 3166554. Working branch: research/data-latency-2026-10-29. Draft PR: https://github.com/Iwetter/UFC-Market-Lab/pull/1 (not merged). Implementation commit: d1e18ff.
 
 ## Completed
 
@@ -17,4 +17,4 @@ Repo: Iwetter/UFC-Market-Lab; checkout is this directory. Base main: 3166554. Wo
 
 Final integration: 110 Python tests + 2 frontend tests passed; TypeScript/Vite build, source secret scan and git diff checks passed. Compose YAML parses. The 30-minute dashboard analysis window runs in a separate bounded worker and retains prior metadata. Development leases prevent overlapping cooperating runs and recover expired runs. Browser verified actual historical report and that mock tags cannot support real latency.
 
-Next: save/commit this verified branch and complete the reviewable GitHub handoff. Then highest priority is credentialed card recording and provider-packet validation once a real read-only key/license/server exists. Until then, improve collector/replay correctness with recorded public data and offline fixtures; don't retrain the same baseline. See ROADMAP.md.
+GitHub handoff saved as draft PR #1. Next: inspect its CI results and resolve any demonstrated failure. Then highest priority is credentialed card recording and provider-packet validation once a real read-only key/license/server exists. Until then, improve collector/replay correctness with recorded public data and offline fixtures; don't retrain the same baseline. See ROADMAP.md.
