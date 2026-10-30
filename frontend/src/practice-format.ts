@@ -1,5 +1,7 @@
 export function practiceReason(code:string):string{
  const reasons:Record<string,string>={
+  net_profit_target_not_reached:'Executable sale proceeds do not yet cover entry cost, exit costs and the configured net profit target.',
+  partial_profit_step_not_met:'Waiting for an additional net price improvement after the last partial sale.',
   order_pending:'Waiting for the previous order to reach the simulated market.',
   cooldown:'Waiting between trades to avoid unnecessary churn.',
   practice_run_order_cap:'The practice session has reached its order limit.',

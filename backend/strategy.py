@@ -89,6 +89,7 @@ class StrategyLedger:
 
     def _history(self):
         cycles, current, last_exit, last_entry, orders = [], {}, {}, {}, {}
+        trade_ledger = []
         # SQLite insertion order breaks equal-timestamp ties, including multi-level fills.
         fills = [f for f in self.broker.store.bodies('fills') if f['ticker'] == self.ticker]
         fills = sorted(fills, key=lambda f: f['ts_ms'])
@@ -118,6 +119,7 @@ class StrategyLedger:
             cycle = current.get(outcome)
             if cycle is None:
                 continue  # An incomplete imported ledger cannot invent a cost basis.
+            realized = ZERO
             if buy:
                 cycle['entry_quantity'] += q
                 cycle['entry_notional'] += price*q
@@ -129,6 +131,7 @@ class StrategyLedger:
                 if q > cycle['open_quantity']:
                     continue
                 released = cycle['open_cost_basis']*q/cycle['open_quantity']
+                realized = cash-released
                 order['realized'] += cash-released
                 anchor['realized_profit_per_contract'] = order['realized']/order['quantity']
                 cycle['exit_quantity'] += q
@@ -141,15 +144,18 @@ class StrategyLedger:
                 if not cycle['open_quantity']:
                     cycle.update(completed=True, closed_ms=fill['ts_ms'])
                     del current[outcome]
+            trade_ledger.append(fill | {'realized_pnl': realized,
+                'remaining_position': cycle['open_quantity'],
+                'remaining_cost_basis': cycle['open_cost_basis']})
         for cycle in cycles:
             cycle['avg_entry_price'] = cycle['entry_notional']/cycle['entry_quantity']
             cycle['avg_entry_cost'] = cycle['entry_cost']/cycle['entry_quantity']
             cycle['avg_exit_price'] = cycle['exit_notional']/cycle['exit_quantity'] if cycle['exit_quantity'] else None
             cycle['avg_exit_net'] = cycle['exit_net']/cycle['exit_quantity'] if cycle['exit_quantity'] else None
-        return cycles, last_exit, last_entry
+        return cycles, last_exit, last_entry, trade_ledger
 
     def snapshot(self, book, fees, cfg, policy, p_yes):
-        cycles, last_exit, last_entry = self._history()
+        cycles, last_exit, last_entry, trade_ledger = self._history()
         positions, unrealized = [], ZERO
         known_marks = True
         probability = _probability(p_yes)
@@ -190,8 +196,17 @@ class StrategyLedger:
                 'current_entry_price': price, 'pullback_met': price is not None and price <= maximum,
                 'requires_current_entry_edge': True}
         realized = sum((D(p['realized_pnl']) for p in self.broker.positions.values() if p['ticker'] == self.ticker), ZERO)
+        trading = sum((c['realized_pnl'] for c in cycles), ZERO)
+        settled = self.ticker in self.broker.settled
+        # Settlement is a separate cash event, never a fabricated SELL fill/cycle.
+        settled_cycles = [c for c in cycles if not c['completed']] if settled else []
         return _strings({'ticker': self.ticker, 'positions': positions,
-            'cycles': [c for c in cycles if c['completed']], 'open_cycles': [c for c in cycles if not c['completed']],
+            'cycles': [c for c in cycles if c['completed']],
+            'open_cycles': [] if settled else [c for c in cycles if not c['completed']],
+            'settled_cycles': settled_cycles, 'trade_ledger': trade_ledger,
+            'realized_trading_pnl': trading, 'settlement_pnl': realized-trading,
+            'unrealized_position_value': sum((p['estimated_exit_net'] for p in positions), ZERO) if known_marks else None,
+            'total_net_pnl': realized+unrealized if known_marks else None,
             'completed_cycles': sum(c['completed'] for c in cycles), 'last_exit': last_exit,
             'last_entry': last_entry, 'reentry': reentry, 'realized_pnl': realized,
             'unrealized_pnl': unrealized if known_marks else None,
@@ -207,6 +222,7 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
               'outcome': None, 'limit': None, 'quantity': None, 'net_edge_after_buffer': None,
               'metrics': metrics}
     def stop(*reasons):
+        metrics['decision_blockers'] = list(reasons)
         return result | {'reasons': list(reasons)}
     p = _probability(p_yes)
     if p is None:
@@ -219,6 +235,29 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
     if any(o['status'] == 'pending' and o['intent']['ticker'] == ticker for o in orders):
         return stop('order_pending')
     positions = {x['outcome']: x for x in metrics['positions']}
+    exposure = sum((D(x['quantity']) for x in positions.values()), ZERO)
+    entries = {}
+    for outcome in ('yes', 'no'):
+        limit, depth = _quote(book, market, cfg, outcome, True)
+        quantity = _size(market, min(D(policy.contracts), depth*cfg.max_participation,
+                                    cfg.max_order_contracts, D(policy.max_position_contracts)-exposure))
+        fair = p if outcome == 'yes' else ONE-p
+        cost = ((limit*quantity+_fee(fees, limit, quantity)).quantize(D('.01'), rounding=ROUND_CEILING)/quantity
+                if limit is not None and quantity > 0 else None)
+        edge = fair-cost-policy.probability_buffer if cost is not None else None
+        anchor = metrics['last_entry'].get(outcome) if positions else metrics['last_exit'].get(outcome)
+        pullback = policy.scale_in_pullback if positions else policy.reentry_pullback
+        reasons = []
+        if cost is None:
+            reasons.append('no_executable_depth_or_grid')
+        elif edge < policy.min_entry_edge:
+            reasons.append('no_net_edge_after_costs_and_buffer')
+        if anchor and limit is not None and limit > D(anchor['price'])-pullback:
+            reasons.append('scale_in_pullback_not_met' if positions else 'reentry_pullback_not_met')
+        entries[outcome] = {'limit': limit, 'quantity': quantity, 'entry_cost_per_contract': cost,
+            'net_edge_after_buffer': edge, 'required_edge': policy.min_entry_edge,
+            'anchor_present': bool(anchor), 'economic_eligibility': not reasons, 'reasons': reasons}
+    metrics['entry_comparisons'] = _strings(entries)
     candidates = []
     # Reducing exits have priority and are independent of entry cooldown/order caps.
     for outcome, pos in positions.items():
@@ -229,6 +268,8 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
         minimum = D('.01') if market.fractional_trading_enabled else ONE
         quantity = _size(market, min(q, max(minimum, amount), depth*cfg.max_participation, cfg.max_order_contracts))
         if limit is None or quantity <= 0:
+            metrics.setdefault('exit_comparisons', {})[outcome] = {
+                'profit_taking_eligible': False, 'reasons': ['no_executable_depth_or_grid']}
             continue
         net = (limit*quantity-_fee(fees, limit, quantity)).quantize(D('.01'), rounding=ROUND_FLOOR)/quantity
         fair = p if outcome == 'yes' else ONE-p
@@ -248,6 +289,10 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
             and net < D(previous_exit['net_price'])+policy.partial_profit_step)
         comparison = metrics['exit_comparisons'][outcome]
         comparison['partial_profit_step_met'] = fresh_profit_level
+        comparison['profit_taking_eligible'] = profit >= policy.net_profit_target_per_contract and fresh_profit_level
+        comparison['reasons'] = ([] if comparison['profit_taking_eligible'] else
+            ['net_profit_target_not_reached'] if profit < policy.net_profit_target_per_contract else
+            ['partial_profit_step_not_met'])
         if profit >= policy.net_profit_target_per_contract and fresh_profit_level:
             candidates.append((2, profit, outcome, limit, quantity, ['net_profit_target_reached'], rich_edge))
         else:
@@ -269,7 +314,6 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
     if cap is not None and sum(o['intent']['ticker'] == ticker and date_utc(o['created_ms']) == date_utc(ts) for o in orders) >= cap:
         return stop('daily_market_order_cap')
     reasons = []
-    exposure = sum((D(x['quantity']) for x in positions.values()), ZERO)
     if positions and not policy.scale_in_enabled:
         return stop('holding_position_scale_in_disabled')
     if exposure >= policy.max_position_contracts:
@@ -277,24 +321,11 @@ def decide_trade(broker, ticker, context, cfg, policy, p_yes, ts, last_attempt=0
     for outcome in ('yes', 'no'):
         if positions and outcome not in positions:
             continue
-        limit, depth = _quote(book, market, cfg, outcome, True)
-        quantity = _size(market, min(D(policy.contracts), depth*cfg.max_participation,
-                                    cfg.max_order_contracts, D(policy.max_position_contracts)-exposure))
-        if limit is None or quantity <= 0:
-            reasons.append('no_executable_depth_or_grid')
+        entry = entries[outcome]
+        if entry['reasons']:
+            reasons.extend(entry['reasons'])
             continue
-        fair = p if outcome == 'yes' else ONE-p
-        entry_cost = (limit*quantity+_fee(fees, limit, quantity)).quantize(D('.01'), rounding=ROUND_CEILING)/quantity
-        edge = fair-entry_cost-policy.probability_buffer
-        if edge < policy.min_entry_edge:
-            reasons.append('no_net_edge_after_costs_and_buffer')
-            continue
-        anchor = metrics['last_entry'].get(outcome) if positions else metrics['last_exit'].get(outcome)
-        pullback = policy.scale_in_pullback if positions else policy.reentry_pullback
-        if anchor and limit > D(anchor['price'])-pullback:
-            reasons.append('scale_in_pullback_not_met' if positions else 'reentry_pullback_not_met')
-            continue
-        candidates.append((edge, outcome, limit, quantity, bool(anchor)))
+        candidates.append((entry['net_edge_after_buffer'], outcome, entry['limit'], entry['quantity'], entry['anchor_present']))
     if not candidates:
         return stop(*(list(dict.fromkeys(reasons)) or ['no_net_edge_after_costs_and_buffer']))
     edge, outcome, limit, quantity, anchored = max(candidates)

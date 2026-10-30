@@ -12,7 +12,7 @@ import hashlib
 import json
 import math
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -210,6 +210,9 @@ class PracticeController:
                   'yes_bid':str(bid), 'yes_ask':str(ask),
                   'net_pnl':portfolio['net_pnl'],'equity':portfolio['equity'],
                   'live_eligible':False, **extra}
+        if 'strategy' not in record:
+            record['strategy'] = StrategyLedger(self.broker,self.ticker).snapshot(
+                self.book,FeeSchedule(verified_ms=self.ts),self.cfg,self.policy,self.prediction['probability_a'])
         self.history.append(record)
         self.store.append('practice_strategy','decision',record,recv_utc_ns=self.ts*1_000_000)
 
@@ -230,7 +233,8 @@ class PracticeController:
         self.last_attempt = self.ts
         self._record(action.upper() if order['status']=='pending' else 'NO-TRADE',
                      order['reasons'] or choice['reasons'],
-                     outcome=outcome,limit=str(limit),quantity=str(quantity),order_id=order['id'],net_edge_after_buffer=str(edge))
+                     outcome=outcome,limit=str(limit),quantity=str(quantity),order_id=order['id'],net_edge_after_buffer=str(edge),
+                     strategy=choice['metrics'])
 
     def _checkpoint(self):
         for round_no in range(1,6):
@@ -348,6 +352,8 @@ class PracticeController:
                   'input_ms':self.prediction['features_asof_ms'], 'prediction':self.prediction,
                   'quotes':self.book.view(), 'decision':self.history[-1] if self.history else None,
                   'history':self.history, 'checkpoints':self.checkpoints, 'orders':self.broker.orders(),
+                  'decision_summary':dict(Counter(reason for decision in self.history
+                      if decision['action'] in ('HOLD','NO-TRADE') for reason in decision['reasons'])),
                   'fills':self.store.bodies('fills'), 'portfolio':self.broker.summary({self.ticker:self.book}),
                   'risk':{'peak_equity':str(self.peak_equity),'stop_reason':self.risk_stop,
                           'daily_drawdown_cap':str(self.cfg.daily_drawdown),'daily_loss_cap':str(self.cfg.max_daily_loss)},
