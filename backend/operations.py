@@ -79,6 +79,7 @@ def collector_health(engine,ts=None):
             "last_ws_ms":engine.health.get("last_ws_ms"),"websocket":engine.health.get("websocket"),
             "market_count":len(engine.markets),"sequence_gaps":engine.books.gaps,
             "clock_offset_ms":engine.clock_offset_ms,"clock_observed_ms":engine.clock_observed_ms,
+            "engine_fault":engine.health.get("engine_fault"),"collector_fault":engine.health.get("collector_fault"),
             "note":"Collector transport health is separate from trading eligibility and clock verification."}
 
 
