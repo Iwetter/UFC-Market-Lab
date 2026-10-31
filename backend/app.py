@@ -19,6 +19,7 @@ from .domain import OrderIntent, Settings, StrictModel, canonical, now_ms
 from .engine import Engine
 from .ingest import LicensedIngest
 from .models import PREFIGHT_FEATURES
+from .runtime_version import runtime_status
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -118,7 +119,7 @@ def create_app(cfg=None, *, background=True, model_path=None, infight_model_path
 
     @app.get("/api/health")
     async def health():
-        return JSONResponse(status_code=503 if engine.health.get("engine_fault") else 200,content={"ok":not bool(engine.health.get("engine_fault")),"mode":"PAPER","source":cfg.source,"live_enabled":False})
+        return JSONResponse(status_code=503 if engine.health.get("engine_fault") else 200,content={"ok":not bool(engine.health.get("engine_fault")),"mode":"PAPER","source":cfg.source,"live_enabled":False,"runtime":runtime_status()})
 
     @app.get("/api/session")
     async def session(request:Request):

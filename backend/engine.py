@@ -279,22 +279,46 @@ class Engine:
                 "mock_running":self.mock_running,"mock_complete":self.mock_index>33,
                 "events_recorded":self.store.db.execute("SELECT count(*) FROM events").fetchone()[0]}
 
+    def check_collector_tasks(self):
+        """Surface fatal worker termination before another strategy/execution tick.
+
+        Optional workers may return when disabled or denied. Every exception or
+        unexpected cancellation is fatal; the required REST loop cannot return.
+        Provider messages are deliberately excluded from public failure details.
+        """
+        for task in self.tasks:
+            if not task.done():continue
+            if task.cancelled():kind='UnexpectedCancellation'
+            else:
+                error=task.exception()
+                if error is None and task.get_name()!='kalshi_rest':continue
+                kind=type(error).__name__ if error is not None else 'UnexpectedReturn'
+            self.health.update(engine_fault='collector_failed',collector_fault={'worker':task.get_name(),'error_type':kind})
+            self.exchange_active=False
+            self.books.invalidate()
+            try:self.broker.kill(now_ms())
+            except Exception as exc:
+                self.broker.killed=True
+                self.health['kill_persistence_error']=type(exc).__name__
+            raise RuntimeError(f"collector {task.get_name()} stopped ({kind})") from None
+
     async def run(self):
-        if self.cfg.source == "kalshi":
-            from .kalshi import KalshiRecorder
-            from .licensed_runtime import configured_recorders
-            licensed=configured_recorders(self)
-            from .polymarket import PolymarketRecorder
-            from .clock_monitor import monitor_clock
-            self.venue_recorder=PolymarketRecorder(self)
-            self.recorder = KalshiRecorder(self)
-            self.tasks = [asyncio.create_task(self.recorder.polling()),asyncio.create_task(self.recorder.streaming())]
-            self.tasks.extend(asyncio.create_task(feed.run()) for feed in licensed)
-            self.tasks.append(asyncio.create_task(self.venue_recorder.run()))
-            self.tasks.append(asyncio.create_task(monitor_clock(self)))
         try:
+            if self.cfg.source == "kalshi":
+                from .kalshi import KalshiRecorder
+                from .licensed_runtime import configured_recorders
+                licensed=configured_recorders(self)
+                from .polymarket import PolymarketRecorder
+                from .clock_monitor import monitor_clock
+                self.venue_recorder=PolymarketRecorder(self)
+                self.recorder = KalshiRecorder(self)
+                self.tasks = [asyncio.create_task(self.recorder.polling(),name="kalshi_rest"),asyncio.create_task(self.recorder.streaming(),name="kalshi_ws")]
+                self.tasks.extend(asyncio.create_task(feed.run(),name=f"licensed_{index}") for index,feed in enumerate(licensed))
+                self.tasks.append(asyncio.create_task(self.venue_recorder.run(),name="polymarket_recorder"))
+                self.tasks.append(asyncio.create_task(monitor_clock(self),name="clock_monitor"))
             last_mock,last_history = 0,0
             while True:
+                self.check_collector_tasks()
                 ts = now_ms()
                 if self.cfg.source == "mock" and self.mock_running and ts-last_mock >= 2000:
                     self.mock_step(ts); last_mock = ts

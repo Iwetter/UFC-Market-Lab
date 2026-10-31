@@ -60,3 +60,51 @@ def test_practice_uses_same_profit_policy_and_real_broker(source,monkeypatch):
     assert state['probability_a']==.65 and len(state['strategy']['cycles'])>=2
     assert state['simulated_account'] and not state['live_eligible']
     p.close()
+
+
+def test_85_percent_replay_cash_fee_ledger_and_settlement(source,monkeypatch):
+    """Fixed synthetic economics through actual virtual latency, never forced actions."""
+    p=controller(source)
+    p.service.predict=lambda a,b,scheduled_ms,as_of_ms:{'probability_a':.85,
+        'model_version':'synthetic-accounting-fixture','features_asof_ms':as_of_ms,
+        'trained_through_ms':1704067200000}
+    def prices(fight_id,elapsed):
+        if elapsed<15000:return D('.28'),D('.30')
+        if elapsed<75000:return D('.55'),D('.57')
+        if elapsed<90000:return D('.23'),D('.25')
+        if elapsed<105000:return D('.50'),D('.52')
+        return D('.78'),D('.80')
+    monkeypatch.setattr('backend.practice.synthetic_quote',prices)
+    p.start('fixture-2');p.control('pause')
+    initial=p.cfg.initial_cash
+    expected=[('buy','1','-.33','0'),('sell','0','.52','.19'),
+              ('buy','1','-.28','0'),('sell','0','.47','.19')]
+    checked=0
+    while p.status!='finished':
+        state=p.control('step')
+        ledger=state['strategy']['trade_ledger']
+        if len(ledger)>checked:
+            action,remaining,cash,realized=expected[checked]
+            fill=ledger[-1]
+            assert fill['action']==action and fill['remaining_position']==remaining
+            assert D(fill['cash_change'])==D(cash) and D(fill['fee'])==D('.02')
+            assert D(fill['realized_pnl'])==D(realized)
+            order=next(o for o in state['orders'] if o['id']==fill['order_id'])
+            assert fill['ts_ms']==order['created_ms']+250==order['arrival_ms']
+            assert fill['book_ms']==fill['ts_ms']
+            checked+=1
+        assert D(state['portfolio']['cash'])==initial+sum((D(f['cash_change']) for f in ledger),D(0))
+        assert state['input_ms']<p.start_ms and state['probability_a']==.85
+        if state['status']!='finished':assert 'result' not in state['fight']
+    assert checked==4 and len({f['id'] for f in ledger})==4
+    assert D(state['strategy']['realized_trading_pnl'])==D('.38')
+    assert D(state['strategy']['settlement_pnl'])==0
+    assert D(state['strategy']['total_net_pnl'])==D(state['portfolio']['net_pnl'])==D('.38')
+    assert state['strategy']['open_cycles']==[]
+    assert p.control('step')['fills']==state['fills']
+    assert p.control('resume')['fills']==state['fills']
+    for decision in state['history']:
+        assert 'strategy' in decision
+    assert any(d['strategy'].get('entry_comparisons',{}).get('yes',{}).get('economic_eligibility') is False
+               for d in state['history'] if d['action']=='NO-TRADE')
+    p.close()
