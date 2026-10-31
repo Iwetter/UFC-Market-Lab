@@ -31,7 +31,7 @@ def round_observation(row, round_no, a_id):
 
 def checkpoint_features(prior, observations, scheduled_rounds, elapsed_s):
     n = len(observations)
-    if scheduled_rounds not in (3, 5) or not 1 <= n < scheduled_rounds or elapsed_s < n*300:
+    if not math.isfinite(elapsed_s) or scheduled_rounds not in (3, 5) or not 1 <= n < scheduled_rounds or elapsed_s < n*300:
         raise ValueError('checkpoint requires completed nonfinal rounds')
     if set(prior) != set(PREFIGHT_FEATURES):
         raise ValueError('missing lagged pre-fight features')
@@ -43,6 +43,11 @@ def checkpoint_features(prior, observations, scheduled_rounds, elapsed_s):
                 if v is None or not math.isfinite(float(v)) or float(v) < 0:
                     raise ValueError('missing or invalid completed-round statistic')
                 totals[side][k] += float(v)
+            current = observation[side]
+            if (float(current['sig_str_landed']) > float(current['sig_str_att']) or
+                    float(current['td_landed']) > float(current['td_att']) or
+                    float(current['ctrl_sec']) > 300):
+                raise ValueError('inconsistent completed-round statistics')
     values = {}
     for side, t in totals.items():
         if t['sig_str_landed'] > t['sig_str_att'] or t['td_landed'] > t['td_att'] or t['ctrl_sec'] > n*300:

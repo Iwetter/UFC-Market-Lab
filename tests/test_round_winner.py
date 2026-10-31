@@ -106,3 +106,20 @@ def test_chronological_report_and_matched_baselines():
     assert folds['validation']['last_date'] < folds['calibration']['first_date']
     assert folds['calibration']['last_date'] < folds['test']['first_date']
     assert folds['test']['existing_prefight_baseline']['n']==folds['test']['round_model']['n']
+
+
+@pytest.mark.parametrize('elapsed',[float('nan'),float('inf'),float('-inf')])
+def test_checkpoint_rejects_nonfinite_clock(elapsed):
+    with pytest.raises(ValueError):
+        checkpoint_features(dict.fromkeys(PREFIGHT_FEATURES,0.),[observation()],3,elapsed)
+
+
+@pytest.mark.parametrize('changes',[
+    {'sig_str_landed':100.}, {'td_landed':4.}, {'ctrl_sec':301.},
+])
+def test_bad_round_cannot_hide_in_valid_cumulative_totals(changes):
+    first,second=observation(),observation()
+    first['a'].update(changes)
+    # Aggregate values remain plausible; each individual round must be valid.
+    with pytest.raises(ValueError,match='inconsistent'):
+        checkpoint_features(dict.fromkeys(PREFIGHT_FEATURES,0.),[first,second],3,600)
