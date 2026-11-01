@@ -57,3 +57,16 @@ Browser verification on cached real source completed Gerald Meerschaert vs Juliu
 Full local checks passed 222 Python tests and7 frontend tests, production TypeScript/Vite build, private-key scan and diff checks. Rebuilt after adding live-workspace actual-fill markers. Shared strategy tests and mode integration tests exercise favored65%/ask45 entry, profitable sale while probability remains unchanged, wait for insufficient pullback, ask44 re-entry and another sale; actual broker fees/slippage/depth/250ms arrival are used. Partial profit ratcheting, fractional costs, risk exits, scaling caps, NO/grid symmetry, restore and no phantom fill anchors are covered.
 
 The reproducible synthetic validation writes its journal/report under work via scripts/validate_profit_cycle.py; see PROFIT_STRATEGY.md for exact quote/fill sequence. Local running API completed a real cached bout with synthetic quotes/fills and fixed historical model. All outputs remain labeled; no historical return or genuine-market automated profit is claimed. Browser QA could not run because local browser use is disabled in Work settings. No exchange contract changed or live gateway was enabled. Authenticated/live-feed and calibrated in-fight model limitations remain.
+
+## October 30 collector supervision follow-up
+
+Three offline regressions reproduced an engine that stayed alive after its REST
+worker raised, returned or canceled. All failed before child-task supervision was
+added. Seven focused tests now cover those cases, WS failure, optional disabled
+returns, normal parent shutdown, pending-order cancellation, failed kill persistence,
+resource cleanup, unhealthy HTTP status and process-supervisor notification.
+Full milestone before the final HTTP-only regression: 228 Python tests, 7 frontend
+tests and production build passed; afterward all7 collector tests passed. Source
+private-key scan and diff checks passed before publication. No external feed,
+model, latency or trading-return result was generated. Prior grid-gap branch CI
+was checked once and passed; these independent fixes are not yet merged into main.

@@ -1,0 +1,81 @@
+{
+  "fight": "Tommy McMillen vs Marwan Rahiki \u00b7 2026-09-12",
+  "scope": "Comparison of the saved run identified above with current shared strategy.",
+  "mode": "PAPER; synthetic-market experiment, not historical exchange returns",
+  "input_checks": {
+    "source_commit": {
+      "original": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "rerun": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "match": true
+    },
+    "model_version": {
+      "original": "5cf9684ff89986158cec904acfd86476ce1707e5f6f501bffb48bdf71a89195c",
+      "rerun": "5cf9684ff89986158cec904acfd86476ce1707e5f6f501bffb48bdf71a89195c",
+      "match": true
+    },
+    "probability_a": {
+      "original": 0.8526375193560606,
+      "rerun": 0.8526375193560606,
+      "match": true
+    },
+    "quote_algorithm": {
+      "original": "sha256(bout_id) phase; 240s triangular mid .17\u2013.83; .04 spread; 100 contracts/level",
+      "rerun": "sha256(bout_id) phase; 240s triangular mid .17\u2013.83; .04 spread; 100 contracts/level",
+      "match": true
+    },
+    "decision_quote_path": {
+      "match": true,
+      "original_points": 61,
+      "rerun_points": 61
+    }
+  },
+  "same_inputs_verified": true,
+  "policy_source": "saved policy",
+  "execution_settings_source": "saved settings; account path isolated",
+  "original": {
+    "run_id": "8fd19768-6258-47de-b779-2150e2510fc4",
+    "probability_a": 0.8526375193560606,
+    "fills": 1,
+    "fill_actions": {
+      "buy": 1
+    },
+    "net_pnl": "0.29",
+    "strategy": {
+      "realized_trading_pnl": null,
+      "settlement_pnl": null,
+      "total_net_pnl": null,
+      "completed_cycles": null
+    }
+  },
+  "rerun": {
+    "run_id": "f97cab2c-614d-4c91-9033-34b89162b44b",
+    "probability_a": 0.8526375193560606,
+    "fills": 6,
+    "fill_actions": {
+      "buy": 3,
+      "sell": 3
+    },
+    "net_pnl": "0.19",
+    "strategy": {
+      "realized_trading_pnl": "0.19",
+      "settlement_pnl": "0.00",
+      "total_net_pnl": "0.19",
+      "completed_cycles": 3
+    }
+  },
+  "legacy_policy_diagnosis": {
+    "revision": "721a105",
+    "sell_rule": "bid - slippage - model_probability - estimated_fee - probability_buffer >= min_exit_edge",
+    "illustration": "At p=.85, defaults slippage=.01, buffer=.05 and exit edge=.02 require bid >= .93 + fee (about .94-.95). Synthetic maximum YES bid is .81. The legacy rule therefore cannot take a profitable YES exit while p remains .85.",
+    "qualification": "Formula describes the legacy rule; the saved run and input checks above identify the actual comparison."
+  },
+  "decision_summary": {
+    "cooldown": 16,
+    "daily_market_order_cap": 30,
+    "holding_position_scale_in_disabled": 6,
+    "no_net_edge_after_costs_and_buffer": 2,
+    "reentry_pullback_not_met": 2,
+    "replay_finished_recorded_result_revealed": 1
+  },
+  "journal_valid": true
+}

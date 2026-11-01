@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
 from typing import Any, Literal
 from uuid import UUID
 
@@ -92,6 +92,21 @@ class Market(BaseModel):
     def on_grid(self, yes_price: Decimal) -> bool:
         return any(b.start <= yes_price <= b.end and (yes_price - b.start) % b.step == 0
                    for b in self.price_ranges) and ZERO < yes_price < ONE
+
+    def execution_price(self, target: Decimal, outcome: Literal['yes','no'], buy: bool) -> Decimal | None:
+        """Nearest conservative outcome price across all YES-leg price bands."""
+        yes_target = target if outcome == 'yes' else ONE-target
+        rounding = ROUND_CEILING if buy == (outcome == 'yes') else ROUND_FLOOR
+        candidates = []
+        for band in self.price_ranges:
+            # Slippage can land inside a gap: search from the band's boundary
+            # rather than rounding outside that band and incorrectly skipping it.
+            band_target = max(yes_target,band.start) if rounding == ROUND_CEILING else min(yes_target,band.end)
+            yes_price = band.start+((band_target-band.start)/band.step).to_integral_value(rounding=rounding)*band.step
+            price = yes_price if outcome == 'yes' else ONE-yes_price
+            if band.start <= yes_price <= band.end and self.on_grid(yes_price) and (price >= target if buy else price <= target):
+                candidates.append(price)
+        return (min(candidates) if buy else max(candidates)) if candidates else None
 
 
 class FightEvent(StrictModel):

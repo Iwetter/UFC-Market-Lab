@@ -1,0 +1,42 @@
+# Fight intelligence audit and experimental round-end implementation
+
+The reported Tommy McMillen / Marwan Rahiki probability, **0.8526375193560606**, was genuine inference from `artifacts/ml/selected.json`, a symmetric regularized logistic model with 13 lagged pre-fight features. Its temperature is 0.9793790214992374, fitted on the 2023 calibration partition. The source is the pinned 6,743-bout UFCStats-derived snapshot. Features are Elo, historical win rate, experience, layoff, striking for/against, takedowns, submissions, control, knockdowns and distance/clinch/ground striking rates. Current-bout data never entered that prediction. Its reused 992-bout test log loss is 0.657287 and Brier 0.232633; it did not outperform the older frozen baseline.
+
+The old Practice controller called pre-fight inference once at Start. It displayed completed rounds without sending them to a fight-winner model. That explains the flat line. The separately saved `round_scoring.json` predicts judge round majority, **not eventual fight winner**; it is never used here. Market oscillations were deterministic synthetic quotes independent of both result and model. The reported $0.19 was simulated trading profit, not historical exchange performance. `REPLAY_REPAIR.md` preserves the earlier exact execution diagnosis.
+
+The shared strategy already evaluated YES and NO independently, using executable bids/asks, fees, slippage, uncertainty buffer, cooldown, inventory and pullback anchors. At an 85% YES estimate, most NO entries had negative expected value. It was not programmed to buy only Tommy. Exits precede entries; opposite-side entry is blocked while a position remains. No thresholds were loosened to manufacture trades. New tests demonstrate BUY YES → SELL YES → BUY NO using two outputs of the actual fitted checkpoint model on controlled inputs. That is software evidence, not historical profitability.
+
+## New model and point-in-time boundary
+
+`artifacts/ml/round-winner.json` is one lightweight C=0.1 symmetric logistic fit, with no search and no pre-fight retraining. It predicts the eventual binary fight winner **conditional on the fight continuing after a completed round**. Training uses the same lagged pre-fight feature vector directly; it does not apply the 2023 fitted pre-fight artifact backwards to older fights. The matched pre-fight probability comparison is evaluated only after that artifact's training date.
+
+Only actual per-round source columns enter the checkpoint vector. A round is eligible after 300 active seconds, only if the bout lasts strictly longer than that boundary, and never after the scheduled final round. Results, method, finish time, whole-fight totals, judge scores and subsequent rounds are absent from inference inputs. Duration is used solely to select survivors and stop the retrospective replay. Source fighter IDs, not winner-first row order, define orientation. Whole bouts/cards remain in a single chronological partition.
+
+Features add cumulative knockdown, significant-strike, takedown, submission, control and strike-context differences; significant-strike and takedown accuracy differences; and change in attempted-strike pace from first to latest completed round. Opponent striking and takedown success supply absorbed/defensive information; no independent unobserved defense counter is fabricated. Each round feature interacts with elapsed fraction of scheduled active time, allowing fitted effects to differ across round/fight lengths. Pace change is an exploratory measurable fatigue proxy, not a claim to directly observe fatigue. Individual event timestamps, physiological fatigue, instantaneous position and midround changes are unavailable. No arbitrary event probability adjustment exists.
+
+Training ends December 2022 (3,819 checkpoints/1,932 bouts); raw validation is January–June 2023 (229 checkpoints); temperature calibration uses later 2023 (226 checkpoints), with seven-day boundary embargoes. Temperature is 1.1080270294610908. Validation metrics use temperature 1 because later calibration was not yet available. No fit or tuning uses the test partition.
+
+| Matched 2024–2026 survivor test, 1,511 checkpoints / 752 bouts | Log loss | Brier | 10-bin ECE |
+|---|---:|---:|---:|
+| Experimental calibrated round-end winner model | 0.532933 | 0.179378 | 0.035425 |
+| Existing pre-fight model held fixed | 0.652650 | 0.230461 | 0.034280 |
+
+`round-winner-evaluation.json` includes equal-probability/Elo comparisons, fold dates/counts, round-specific results and calibration bins. This is promising retrospective outcome discrimination, **not a validated live model**. The project's holdout has been viewed before; checkpoints within bouts are correlated; no independent-sample confidence intervals or profitability claims are made. Round-boundary availability is assumed retrospectively, not a verified source publication/receive time. All updates remain research-only, never live-approved.
+
+## Application and source separation
+
+Practice starts with the existing pre-fight prediction, then recalculates only at eligible completed-round checkpoints. Missing/invalid statistics or an unavailable artifact retain the previous estimate with an explicit reason. Final-round information is display-only. The strategy receives the new probability on the same checkpoint frame, with all existing PAPER risk gates intact. Journals retain prior/new probability, exact feature vector, fitted log-odds contributions, model hash and availability basis. Contributions explain the calculation, not causal event impacts.
+
+The chart plots stepwise fighter A and B estimates, four synthetic YES/NO bid/ask series and actual simulated BUY/SELL fill markers. The clickable evidence timeline exposes before/after values and inputs. No decorative movement or inferred knockdown timestamp is added. Portfolio and trade audit keep trading, settlement, liquidation value, fees and contract inventory separate.
+
+Practice's synthetic single winner contract explicitly returns 0.5 on draw/NC; model training excludes nonbinary outcomes. Consequently 1−p is conditional binary opponent probability, not a calibrated draw/NC-adjusted real-market value. Separately listed opponent contracts are **not** merged or treated as interchangeable. Real mappings/settlement rules require existing review; Polymarket execution remains unsupported. Cancellation and special settlement do not acquire invented probabilities.
+
+Source categories remain separate: pinned historical fights/statistics; current genuine market recorder observations; controlled synthetic Practice books/fills. A fresh bounded real Kalshi adapter check discovered 24 UFC markets and recorded an actual order book; `round-intelligence-data-check.json` contains evidence, with raw local journal under `work/round-intelligence`. This current book is never relabeled as historical Practice odds. Prior genuine Polymarket US captures and rate-limit behavior are documented in `polymarket.md`; they were not redundantly polled.
+
+Existing research in `live-data-options.md` and `latency-study.md` identifies Sportradar UFC DDE as the licensed event/stat feed candidate and SportsDataIO as a round-oriented alternative. The existing optional DDE adapter retains raw packets/sequences but lacks verified licensed packets in this installation. No entitlement, paid subscription or exact physical event time is assumed. Live PAPER therefore stays pre-fight-only and stops at the existing earliest-start boundary. Real funds remain disabled.
+
+## Verification and reproducibility
+
+`tests/test_round_winner.py` covers A artifact-backed reproducibility/symmetry/tamper rejection; B timestamped checkpoint input recalculation; C both contract sides; D filled YES closure then NO entry using trained outputs; E no future/final-round input and no early release; F broker fees, inventory and journal integrity. Existing strategy, execution, mapping, provider and Practice tests cover depth, partial fills, settlement, risk and source boundaries. G real availability is separately evidenced by the actual adapter capture above; offline adapter tests alone are not represented as live observations.
+
+`python scripts/train_round_winner.py` caches its artifact and samples and refuses unchanged retraining. Loading and replay use ordinary local code, with no LLM per event. Browser automation is disabled on this host; rendered component/build/API checks are used and no visual browser QA is claimed.

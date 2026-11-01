@@ -12,7 +12,7 @@ import hashlib
 import json
 import math
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -27,18 +27,20 @@ from .historical import ATTRIBUTION, SOURCE_COMMIT, number
 from .prediction_service import PredictionService
 from .store import Store
 from .strategy import StrategyLedger,decide_trade
+from .round_winner import (load_model, checkpoint_features, round_observation, predict as predict_round,
+                           AVAILABILITY)
 
 
 LIMITATIONS = [
     "Real recorded bout/round statistics; current source snapshot with assumed seven-day availability, not recorded forward predictions.",
-    "The trained pre-fight probability stays fixed throughout replay. No trained in-fight win model is available.",
+    "Experimental trained fight-winner updates use completed nonfinal rounds only while the fight continues; unchanged between checkpoints. Missing inputs retain the prior estimate.",
     "Quotes, depth, fees and fills are synthetic practice assumptions, not historical exchange observations or evidence of profit.",
     "Quote path uses only bout ID and elapsed time, independently of outcome and recorded statistics. Trades are not guaranteed.",
     "Only completed round aggregates are revealed; no strike, knockdown or position timestamps are inferred. Round breaks are omitted.",
     "Previously viewed 2024–2026 holdout; experimental PAPER only, never live approval.",
 ]
 SOURCES = {"fight": "pinned nlbair/ufc-data / UFCStats historical snapshot",
-           "model": "fixed trained pre-fight portable research model",
+           "model": "trained pre-fight model plus experimental calibrated round-end fight-winner model",
            "market": "SYNTHETIC deterministic practice order book; not historical exchange data",
            "execution": "isolated PaperBroker simulation; 250ms virtual latency, quadratic assumed fees",
            "clock": "virtual active fight time; no host clock or real feed claim"}
@@ -147,6 +149,17 @@ class PracticeController:
         self.broker = PaperBroker(self.store, self.cfg)
         self.row, self.fight, self.a_id, self.b_id = dict(row), dict(public), a, b
         self.prediction = prediction
+        self.prefight_prediction = dict(prediction)
+        self.model_updates = []
+        self.round_model = None
+        self.model_update_reason = 'No completed-round evidence yet; retaining pre-fight estimate.'
+        try:
+            candidate = load_model(self.root)
+            if candidate['trained_through'] >= row['event_date']:
+                raise ValueError('checkpoint artifact training is later than replay cutoff')
+            self.round_model = candidate
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            self.model_update_reason = 'Round-end model unavailable: '+str(exc)
         self.start_ms = _day_ms(row['event_date'])
         self.elapsed_ms = 0
         self._finish_ms = int(float(row['fight_duration_sec'])*1000)
@@ -206,10 +219,16 @@ class PracticeController:
                   'elapsed_s':self.elapsed_ms/1000,
                   'virtual_time_ms':self.ts, 'model_version':self.prediction['model_version'],
                   'input_ms':self.prediction['features_asof_ms'], 'probability_a':self.prediction['probability_a'],
+                  'probability_b':1-self.prediction['probability_a'],
+                  'model_update_reason':self.model_update_reason,
                   'probability_buffer':str(self.policy.probability_buffer), 'mode':'PRACTICE',
                   'yes_bid':str(bid), 'yes_ask':str(ask),
+                  'no_bid':str(ONE-ask), 'no_ask':str(ONE-bid),
                   'net_pnl':portfolio['net_pnl'],'equity':portfolio['equity'],
                   'live_eligible':False, **extra}
+        if 'strategy' not in record:
+            record['strategy'] = StrategyLedger(self.broker,self.ticker).snapshot(
+                self.book,FeeSchedule(verified_ms=self.ts),self.cfg,self.policy,self.prediction['probability_a'])
         self.history.append(record)
         self.store.append('practice_strategy','decision',record,recv_utc_ns=self.ts*1_000_000)
 
@@ -230,7 +249,8 @@ class PracticeController:
         self.last_attempt = self.ts
         self._record(action.upper() if order['status']=='pending' else 'NO-TRADE',
                      order['reasons'] or choice['reasons'],
-                     outcome=outcome,limit=str(limit),quantity=str(quantity),order_id=order['id'],net_edge_after_buffer=str(edge))
+                     outcome=outcome,limit=str(limit),quantity=str(quantity),order_id=order['id'],net_edge_after_buffer=str(edge),
+                     strategy=choice['metrics'])
 
     def _checkpoint(self):
         for round_no in range(1,6):
@@ -246,6 +266,32 @@ class PracticeController:
                           'available':any(v is not None for side in data.values() for v in side.values())}
             self.checkpoints.append(checkpoint)
             self.store.append('practice_historical','completed_round',checkpoint,recv_utc_ns=self.ts*1_000_000)
+            if self.elapsed_ms >= self._finish_ms or round_no >= int(self.row['scheduled_rounds']):
+                self.model_update_reason = 'Fight ended; completed final statistics are display-only, never predictive inputs.'
+                continue
+            before = self.prediction['probability_a']
+            update = {'round':round_no,'elapsed_s':round_no*300,'probability_before':before,
+                      'availability_basis':AVAILABILITY,'event_time_utc':None,'live_eligible':False}
+            try:
+                if self.round_model is None:
+                    raise ValueError('experimental round-end artifact unavailable')
+                observations = [round_observation(self.row,n,self.a_id) for n in range(1,round_no+1)]
+                features = checkpoint_features(self.prefight_prediction['features'],observations,
+                                               int(self.row['scheduled_rounds']),self.elapsed_ms/1000)
+                probability, contributions = predict_round(self.round_model,features)
+                self.prediction = {**self.prefight_prediction,'probability_a':probability,
+                    'model_version':self.round_model['spec_sha256'],'features':features,
+                    'features_asof_ms':self.ts,'availability_basis':AVAILABILITY,
+                    'model_scope':'experimental_round_end_fight_winner','completed_round':round_no}
+                self.model_update_reason = f'Processed completed round {round_no}; trained fight-winner inference from cumulative statistics and lagged pre-fight history.'
+                update.update(updated=True,probability_after=probability,features=features,
+                              logit_contributions=contributions,model_version=self.round_model['spec_sha256'])
+            except (ValueError, KeyError, TypeError) as exc:
+                self.model_update_reason = 'No model update: '+str(exc)
+                update.update(updated=False,probability_after=before)
+            update['reason'] = self.model_update_reason
+            self.model_updates.append(update)
+            self.store.append('practice_model','checkpoint_inference',update,recv_utc_ns=self.ts*1_000_000)
 
     def _risk_guards(self):
         equity = D(self.broker.summary({self.ticker:self.book})['equity'])
@@ -345,9 +391,13 @@ class PracticeController:
                   'clock_remaining':300 if not self.elapsed_ms else (300_000-(self.elapsed_ms-1)%300_000-1)//1000,
                   'virtual_time_ms':self.ts, 'simulated_account':True,
                   'probability_a':self.prediction['probability_a'], 'model_version':self.prediction['model_version'],
+                  'probability_b':1-self.prediction['probability_a'], 'model_updates':self.model_updates,
+                  'model_update_reason':self.model_update_reason,'prefight_prediction':self.prefight_prediction,
                   'input_ms':self.prediction['features_asof_ms'], 'prediction':self.prediction,
                   'quotes':self.book.view(), 'decision':self.history[-1] if self.history else None,
                   'history':self.history, 'checkpoints':self.checkpoints, 'orders':self.broker.orders(),
+                  'decision_summary':dict(Counter(reason for decision in self.history
+                      if decision['action'] in ('HOLD','NO-TRADE') for reason in decision['reasons'])),
                   'fills':self.store.bodies('fills'), 'portfolio':self.broker.summary({self.ticker:self.book}),
                   'risk':{'peak_equity':str(self.peak_equity),'stop_reason':self.risk_stop,
                           'daily_drawdown_cap':str(self.cfg.daily_drawdown),'daily_loss_cap':str(self.cfg.max_daily_loss)},

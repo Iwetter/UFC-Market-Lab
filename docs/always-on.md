@@ -55,3 +55,19 @@ Backups run every six hours using SQLite's backup API through a separate read-on
 Run chrony/NTP on the host. Submit a measured offset to `/api/clock` every 60 seconds with a local operator token; offsets beyond 50 ms or missing observations block paper orders. Container wall time follows the host. A configured NTP daemon is not a measured accuracy result, and no zero-offset sample is fabricated in real mode.
 
 For latency studies, use a single session and complete pre/post-event coverage. Record broadcast observations separately from physical timestamps. The current database has no licensed paired physical fight events proving a twelve-second delay. The dashboard reports that gap explicitly rather than substituting mock observations.
+
+## Fatal collector worker supervision
+
+Collector child-task exceptions or unexpected cancellation now fail the PAPER
+engine closed before its next execution tick. The required Kalshi REST poll loop
+also cannot return silently. Books become invalid, exchange eligibility is disabled,
+pending PAPER orders are canceled and a generic collector fault reaches the main
+service supervisor. Health reports identify only the worker and error class; raw
+provider exception messages are omitted. The container process can then exit for
+its ordinary restart policy. The persisted PAPER kill switch remains set after
+restart until operator review; recording may recover independently of order eligibility.
+
+Optional streams/time observers that return because they are disabled or access
+is denied do not falsely kill the service. A normal parent cancellation still
+joins workers and closes transport resources. This covers fatal task termination;
+existing transport reconnect/backoff logic continues handling recoverable failures.

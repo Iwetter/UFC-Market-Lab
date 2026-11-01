@@ -38,7 +38,7 @@ mapping forms or host time synchronization for this isolated simulation.
 | --- | --- |
 | Fighters, bout date, result and recorded round aggregates | Pinned, hashed Noah Bair/UFCStats historical snapshot, CC BY 4.0 |
 | Pre-fight probability | Actual fitted portable research model using reconstructed earlier history; selected-bout/future statistics excluded |
-| Probability during playback | Fixed at its pre-fight value; no trained in-fight model is available |
+| Probability during playback | Experimental calibrated fight-winner updates after eligible completed rounds; held unchanged between checkpoints |
 | Statistics during a round | Hidden; only completed round checkpoints are revealed, with missing fields marked unavailable |
 | Prices and depth | Explicitly synthetic deterministic scenario based on bout ID and elapsed time, independent of winner, model probability and future statistics |
 | Fees and fills | Assumed practice fee schedule and simulated shared PAPER execution |
@@ -53,8 +53,8 @@ a pullback from an actual exit plus a current favorable edge. Partial exits and
 scaling controls are available in the shared strategy panel. See
 [profit-taking policy and cycle validation](PROFIT_STRATEGY.md).
 
-This flow lets you judge how the bot responds to prices and compare its fixed
-prediction with a historical result. **Practice P&L is not a historical exchange
+This flow lets you judge how the bot responds to prices and compare its checkpoint
+predictions with a historical result. **Practice P&L is not a historical exchange
 return.** There are no synchronized historical Kalshi/Polymarket books in this
 dataset. This current snapshot also reconstructs publication availability using
 an assumed embargo, rather than observed historical receive times. The reused
@@ -81,3 +81,7 @@ Neither is needed to press Start on the historical Practice screen.
 
 See [documented product problems](PRODUCT_ISSUES.md), [model comparison](ml-pipeline.md)
 and [source attribution](data_sources.md) for the remaining limitations.
+
+## Experimental round-end updates (October 30)
+
+Practice now updates the fight-winner estimate after eligible completed rounds using a separately trained, calibrated experimental model. Final rounds and missing inputs never cause predictive updates. See [FIGHT_INTELLIGENCE.md](FIGHT_INTELLIGENCE.md) for the model, evidence, timeline and limitations. All market prices/fills remain explicitly synthetic.

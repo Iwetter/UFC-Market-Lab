@@ -264,3 +264,26 @@ def test_invalid_probability_is_no_trade(tmp_path, p):
 def test_invalid_policy_rejected(settings):
     with pytest.raises(ValidationError):
         ProfitPolicy(**settings)
+
+
+def test_settlement_is_separate_from_trading_and_does_not_invent_sell(tmp_path):
+    broker,c,cfg=environment(tmp_path)
+    execute(broker,c,1000,choose(broker,c,cfg,1000))
+    quote(c,2000,'.46','.48')
+    hold=choose(broker,c,cfg,2000)
+    assert hold['action']=='HOLD'
+    comparison=hold['metrics']['exit_comparisons']['yes']
+    assert not comparison['profit_taking_eligible']
+    assert comparison['reasons']==['net_profit_target_not_reached']
+    assert D(comparison['estimated_exit_profit_per_contract'])==D('-.03')
+    broker.settle('X',D(1),3000,source='mock')
+    broker.settle('X',D(1),3001,source='mock')
+    state=StrategyLedger(broker,'X').snapshot(c['book'],c['fees'],cfg,ProfitPolicy(),'.65')
+    assert D(state['realized_trading_pnl'])==0
+    assert D(state['settlement_pnl'])==D('.53')
+    assert D(state['total_net_pnl'])==D('.53')
+    assert state['open_cycles']==[] and len(state['settled_cycles'])==1
+    assert len(state['trade_ledger'])==1 and state['trade_ledger'][0]['action']=='buy'
+    assert D(broker.cash)==cfg.initial_cash+D('.53')
+    restored=PaperBroker(broker.store,cfg)
+    assert StrategyLedger(restored,'X').snapshot(c['book'],c['fees'],cfg,ProfitPolicy(),'.65')==state
