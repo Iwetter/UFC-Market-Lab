@@ -40,16 +40,7 @@ def _probability(value):
 
 def _limit(market, price, outcome, buy):
     """Round the YES-leg grid in the conservative execution direction."""
-    target = price if outcome == 'yes' else ONE-price
-    choices = []
-    for band in market.price_ranges:
-        rounding = ROUND_CEILING if buy == (outcome == 'yes') else ROUND_FLOOR
-        band_target = max(target, band.start) if rounding == ROUND_CEILING else min(target, band.end)
-        yes = band.start+((band_target-band.start)/band.step).to_integral_value(rounding=rounding)*band.step
-        effective = yes if outcome == 'yes' else ONE-yes
-        if market.on_grid(yes) and (effective >= price if buy else effective <= price):
-            choices.append(effective)
-    return (min(choices) if buy else max(choices)) if choices else None
+    return market.execution_price(price,outcome,buy)
 
 
 def _fee(fees, price, quantity):
